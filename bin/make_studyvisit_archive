@@ -1,14 +1,31 @@
 #!/usr/bin/env python3
+"""Reproducible (DICOM) archive builder.
 
+This utility generates a TAR archive from a directory containing DICOM files.
+
+The input directory can have any number of files, with any organization or
+naming. However, the DICOM files are assumed to come from a single "visit"
+(i.e., the time between a person or sample entering and then leaving a
+scanner). The input directory's content is copied into a TAR archive verbatim,
+with no changes to filenames or organization.
+
+In order to generate reproducible TAR archives, the file order, recorded
+permissions and ownership, and modification times are standardized. All files
+in the TAR archive are declared to be owned by root/root (uid/gid: 0/0) with
+0644 permissions. The modification time of any DICOM file is determined
+by its contained DICOM `StudyDate/StudyTime` timestamps. The modification time
+for any non-DICOM file is set to the latest timestamp across all DICOM files.
+"""
 from datetime import datetime
 from hashlib import md5
 import os
 from pathlib import Path
-import sys
 import tarfile
 from typing import Dict
 
 from tqdm import tqdm
+
+# this implementation works with pydicom 2x
 from pydicom import (
     dcmread,
 )
@@ -108,12 +125,12 @@ def generate_md5sum_file(path):
     )
 
 
-def main(argv):
-    # check parameters are present
-    input_base_dir = Path(sys.argv[1])
-    output_base_dir = Path(sys.argv[2])
-    study_id = sys.argv[3]
-    visit_id = sys.argv[4]
+def main(input_base_dir: str,
+         output_base_dir: str,
+         study_id: str,
+         visit_id: str):
+    input_base_dir = Path(input_base_dir)
+    output_base_dir = Path(output_base_dir)
     # get and check archive path
     archive_path = get_archive_path(
         output_base_dir,
@@ -152,4 +169,30 @@ def main(argv):
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    import argparse
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument(
+        "-o", "--output-dir", metavar='PATH', default=os.getcwd(),
+        help="Base directory to place the archive structure in. "
+        "The corresponding '<study-id>/' subdirectory for the "
+        "study is created automatically, if needed")
+    p.add_argument(
+        '--id', nargs=2, metavar=('STUDY-ID', 'VISIT-ID'), required=True,
+        help="The study and visit identifiers, used to name and "
+        "locate the generated archive in the storage organization. "
+        "The study identifier must be globally unique in the storage "
+        "system, and the visit identifier must be unique within the "
+        "collection of visits in the given study")
+    p.add_argument(
+        'input_dir', metavar='<input-dir>',
+        help="Directory with the files to place into the visit archive. "
+        "The input base directory itself is not put into the archive "
+        "(i.e., its own name is irrelevant). Instead, a top-level "
+        "directory with the name '<study-id>_<visit_id>' is used "
+        "to place all archive content in.")
+    args = p.parse_args()
+    main(input_base_dir=args.input_dir,
+         output_base_dir=args.output_dir,
+         study_id=args.id[0],
+         visit_id=args.id[1],
+    )
