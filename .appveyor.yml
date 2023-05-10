@@ -21,8 +21,8 @@ install:
   - sh: .appveyor/apache_enable_user_dir
 
   # Create study directories
-  -sh: sudo mkdir -p /var/www/data/study_1
-  -sh: sudo mkdir -p /var/www/data/study_2
+  - sh: sudo mkdir -p /var/www/data/study_1
+  - sh: sudo mkdir -p /var/www/data/study_2
 
   # Create user http content and link a study
   - sh: mkdir ~/public_html
