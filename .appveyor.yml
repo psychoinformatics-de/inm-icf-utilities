@@ -1,0 +1,31 @@
+# This setup tests ICF-related software and workflows. There are two elements
+# that have to be kept aligned with ICF's environment:
+#
+# 1. The input data structure should match the data that ICF receives from
+#    acquisition sides.
+#
+# 2. The software environment should match the environment on ICF's machines,
+#    i.e. the versions of: `git`, `git-annex`, `python`, `datalad`, and
+#    `datalad-next`.
+
+
+# Turn of support for MS project build support, we do not need it.
+build: off
+
+
+# This version of Ubuntu is based on debian bullseye
+image: Ubuntu
+
+
+environment:
+  APPVEYOR_SSH_KEY: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0ou94Vnrz7iClYApJWv9FVOjT8uDgaF4Uf6wRW2VzLWD4/YwtxD5tsri9SfyQXFwVs94H0EAZSUz06VSM7uQwtOyeoHhERCfx0u+GC1UaFPLi20+4x7GLwipKLRWaf6dHfO5R4LkgDxH9Lc2KbzD0JYB7Lt4Hk54TWd1RaLuM0JGJCJc/0z5uQsyf6iH3Rf2Rcueoa61ztyjBwHaTJT8NOOtBATJXupN5c7Ss63hM7NecMdsalkLCnKQ3CwXQ8Wyp6w3XKvTlymJaWZBxBlA8MzVv89z9oReYnbWDzfWvNn4JU9JDcyOxTec/hd58vRZ+Pz1ZFU6WipoJ0gb0GBu/
+  APPVEYOR_SSH_BLOCK: true
+
+install:
+  # Install apache
+  - sh: sudo apt update
+  - sh: sudo apt install apache2
+
+  # Enable external SSH access to CI worker on all other systems. This needs
+  # APPVEYOR_SSH_KEY defined in project settings (or environment)
+  - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
