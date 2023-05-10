@@ -16,8 +16,8 @@ environment:
 
 install:
   # Install apache
-  - sh: sudo apt update
-  - sh: sudo apt install apache2
+  - sh: sudo apt-get update
+  - sh: sudo apt-get -y install apache2
 
   # Enable external SSH access to CI worker on all other systems. This needs
   # APPVEYOR_SSH_KEY defined in project settings (or environment)
