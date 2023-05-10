@@ -1,0 +1,16 @@
+#!/bin/bash
+
+set -e -u
+
+sudo htpasswd -bc /var/www/passwords test.user secret_1
+
+cat > /tmp/htaccess <<EOF
+AuthType Basic
+AuthName "Restricted study data"
+AuthBasicProvider file
+AuthUserFile "/var/www/passwords"
+Require user test.user
+EOF
+
+sudo cp /tmp/htaccess /var/www/data/study_1/.htaccess
+sudo cp /tmp/htaccess /var/www/data/study_2/.htaccess

@@ -24,9 +24,16 @@ install:
   - sh: sudo mkdir -p /var/www/data/study_1
   - sh: sudo mkdir -p /var/www/data/study_2
 
-  # Create user http content and link a study
+  # Create user http content and link two studies. The http server is configured
+  # to follow only links if the owner of the link matches the owner of the
+  # target. Therefore root has to create the links.
   - sh: mkdir ~/public_html
-  - sh: ln -s /var/www/data/study_1 ~/public_html/study_1
+  - sh: sudo ln -s /var/www/data/study_1 /home/appveyor/public_html/study_1
+  - sh: sudo ln -s /var/www/data/study_2 /home/appveyor/public_html/study_2
+
+  # Enable basic authentication and authorization for the study directories. The
+  # user name is ``test.user´´, the password is ``secret_1´´.
+  - sh: .appveyor/apache_enable_authentication
 
   # Enable external SSH access to CI worker on all other systems. This needs
   # APPVEYOR_SSH_KEY defined in project settings (or environment)
