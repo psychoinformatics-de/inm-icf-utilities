@@ -4,7 +4,7 @@ set -e -u
 
 pushd /etc/apache2/mods-enabled
 
-sudo ln -s ../mods-available/userdir.conf
+sudo ln -s ../mods-available/userdir.load
 sudo ln -s ../mods-available/userdir.conf
 
 popd
