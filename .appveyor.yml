@@ -21,30 +21,34 @@ environment:
 
 
 install:
-  # Install apache
+  # Install apache and enable user-dir serving
   - sh: sudo apt-get update
   - sh: sudo apt-get -y install apache2
   - sh: .appveyor/apache_enable_user_dir
 
-  # Create study directories
-  - sh: sudo mkdir -p /var/www/data/study_1
-  - sh: sudo mkdir -p /var/www/data/study_2
+  # The root for study data and the studies that we simulate
+  - sh: DATA_DIR=/var/www/data
+  - sh: STUDIES="study_1 study_2"
 
-  # Create user http content and link two studies. The http server is configured
-  # to follow only links if the owner of the link matches the owner of the
-  # target. Therefore root has to create the links.
+  # Create study directories
+  - sh: for s in $STUDIES; do sudo mkdir -p "$DATA_DIR"/$s; done
+
+  # Create user http content and create links to the studies in. The http server
+  # is configured to follow only links if the owner of the link matches the
+  # owner of the target. Therefore, user ``root´´ has to create the links.
   - sh: mkdir ~/public_html
-  - sh: sudo ln -s /var/www/data/study_1 /home/appveyor/public_html/study_1
-  - sh: sudo ln -s /var/www/data/study_2 /home/appveyor/public_html/study_2
+  - sh: for s in $STUDIES; do sudo ln -s "$DATA_DIR"/$s /home/appveyor/public_html/$s
 
   # Enable basic authentication and authorization for the study directories. The
-  # user name is ``test.user´´, the password is ``secret_1´´.
-  - sh: .appveyor/apache_enable_authentication
+  # username is ``test.user´´, the password is ``secret_1´´.
+  - sh: .appveyor/apache_enable_authentication test.user secret_1 $STUDIES
 
-  # Enable external SSH access to CI worker on all other systems. This needs
-  # APPVEYOR_SSH_KEY defined in project settings (or environment)
+  # Enable external SSH access to CI worker on all other systems. This uses the
+  # public key defined in APPVEYOR_SSH_KEY. If APPVEYOR_SSH_BLOCK is ``true´´,
+  # the worker waits with the continuation of the build beyond this point until
+  # the file ``~/build.lock´´ is removed.
   - sh: curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
 
 
-# Disable automatic builds with MSBuild, we do not use it.
+# Disable automatic builds with MSBuild, we use custom build steps instead.
 build: off
