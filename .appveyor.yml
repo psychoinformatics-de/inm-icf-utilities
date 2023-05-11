@@ -21,20 +21,25 @@ environment:
 
 
 install:
+  # The root for study data and the studies that we simulate. These variables
+  # are available throughout ``install:´´ and in the executed scripts.
+  - sh: export FROM_SCANNER=/var/inm/input
+  - sh: export STUDIES_DIR=/var/www/data
+  - sh: export STUDIES="study_1 study_2"
+
   # Install apache and enable user-dir serving
   - sh: sudo apt-get update
   - sh: sudo apt-get -y install apache2
   - sh: .appveyor/apache_enable_user_dir
 
-  # The root for study data and the studies that we simulate. These variables
-  # are available in ``install:´´ and in the executed scripts.
-  - sh: export DATA_DIR=/var/www/data
-  - sh: export STUDIES="study_1 study_2"
+  # Create data input directory and populate it
+  - sh: sudo mkdir "$FROM_SCANNER"
+  - sh:
 
   # Create study directories
   - sh:
       for s in $STUDIES;
-        do sudo mkdir -p "$DATA_DIR"/$s;
+        do sudo mkdir -p "$STUDIES_DIR"/$s;
       done
 
   # Create user http content and create links to the studies in. The http server
@@ -43,12 +48,16 @@ install:
   - sh: mkdir ~/public_html
   - sh:
       for s in $STUDIES; do
-        sudo ln -s "$DATA_DIR"/$s /home/appveyor/public_html/$s;
+        sudo ln -s "$STUDIES_DIR"/$s /home/appveyor/public_html/$s;
       done
 
   # Enable basic authentication and authorization for the study directories. The
   # username is ``test.user´´, the password is ``secret_1´´.
-  - sh: .appveyor/apache_enable_authentication test.user secret_1 $STUDIES
+  - sh:
+      .appveyor/apache_enable_authentication
+      $STUDIES_DIR
+      test.user secret_1
+      $STUDIES
 
   # Enable external SSH access to CI worker on all other systems. This uses the
   # public key defined in APPVEYOR_SSH_KEY. If APPVEYOR_SSH_BLOCK is ``true´´,

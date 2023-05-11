@@ -2,8 +2,9 @@
 
 set -e -u
 
-user=$1; shift
-password=$1; shift
+studies_dir="$1"; shift
+user="$1"; shift
+password="$1"; shift
 
 sudo htpasswd -bc /var/www/passwords "$user" "$password"
 
@@ -16,8 +17,8 @@ Require user test.user
 EOF
 
 while [ "$*" ]; do
-  echo Setting access restrictions for "$DATA_DIR"/"$1"
-  sudo cp /tmp/htaccess "$DATA_DIR"/"$1"/.htaccess
+  echo Setting access restrictions for "$studies_dir"/"$1"
+  sudo cp /tmp/htaccess "$studies_dir"/"$1"/.htaccess
   shift
 done
 
