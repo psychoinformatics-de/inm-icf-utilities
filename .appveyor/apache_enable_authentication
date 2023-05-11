@@ -17,6 +17,7 @@ EOF
 
 while [ "$1" ]; do
   sudo cp /tmp/htaccess "$DATA_DIR"/"$1"/.htaccess
+  shift
 done
 
 rm -f /tmp/htaccess
