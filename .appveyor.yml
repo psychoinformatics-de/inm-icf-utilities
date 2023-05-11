@@ -35,11 +35,20 @@ install:
   # Create data input directory and populate it
   - sh: sudo mkdir "$FROM_SCANNER"
   - sh:
+      for s in $STUDIES; do
+        .appveyor/data_create_scanner_output $FROM_SCANNER $s 10 20
+      done
 
   # Create study directories
   - sh:
-      for s in $STUDIES;
-        do sudo mkdir -p "$STUDIES_DIR"/$s;
+      for s in $STUDIES; do
+        sudo mkdir -p "$STUDIES_DIR"/$s;
+      done
+
+  # Run the ingestion script
+  - sh:
+      for s in $STUDIES; do
+        bin/make_studyvisit_archive --output-dir "$STUDIES_DIR" --id $s visit1 "$FROM_SCANNER"
       done
 
   # Create user http content and create links to the studies in. The http server
