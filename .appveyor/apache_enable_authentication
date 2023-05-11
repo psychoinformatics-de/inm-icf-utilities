@@ -15,8 +15,8 @@ AuthUserFile "/var/www/passwords"
 Require user test.user
 EOF
 
-while [ "$1" ]; do
-  echo setting access restrictions for "$DATA_DIR"/"$1"
+while [ "$*" ]; do
+  echo Setting access restrictions for "$DATA_DIR"/"$1"
   sudo cp /tmp/htaccess "$DATA_DIR"/"$1"/.htaccess
   shift
 done
