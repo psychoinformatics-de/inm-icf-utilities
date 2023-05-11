@@ -94,7 +94,7 @@ install:
   # the worker waits with the continuation of the build beyond this point until
   # the file ``~/build.lock´´ is removed.
   - sh:
-      if [ X"$ACTIVATE_SSH_LOGIN" == "Xtrue" ]; then;
+      if [ X"$ACTIVATE_SSH_LOGIN" == "Xtrue" ]; then
         curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
       fi
 

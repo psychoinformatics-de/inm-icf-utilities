@@ -1,10 +1,6 @@
 from pathlib import Path
 
-from datalad_next.datasets import Dataset
-from datalad.api import (
-    create,
-    download
-)
+from datalad.distribution.dataset import Dataset
 
 
 protocol = 'http'
