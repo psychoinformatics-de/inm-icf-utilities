@@ -1,2 +1,5 @@
+datalad
+datalad-next
 pydicom
+pytest
 tqdm

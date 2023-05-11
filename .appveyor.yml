@@ -32,6 +32,9 @@ install:
   - sh: sudo apt-get -y install apache2
   - sh: .appveyor/apache_enable_user_dir
 
+  # Install git-annex that comes with the system
+  - sh: sudo apt-get -y install git-annex
+
   # Create data input directory and populate it
   - sh: sudo mkdir -p "$FROM_SCANNER"
   - sh:
@@ -68,9 +71,15 @@ install:
   # username is ``test.user´´, the password is ``secret_1´´.
   - sh:
       .appveyor/apache_enable_authentication
-      $STUDIES_DIR
-      test.user secret_1
-      $STUDIES
+        $STUDIES_DIR
+        test.user secret_1
+        $STUDIES
+
+  # Set up git identification to supress warnings
+  - git config --global user.email "test@appveyor.land"
+  - git config --global user.name "Appveyor Almighty"
+  # enable "next" extension for patching datalad core
+  - git config --global datalad.extensions.load next
 
   # Enable external SSH access to CI worker on all other systems. This uses the
   # public key defined in APPVEYOR_SSH_KEY. If APPVEYOR_SSH_BLOCK is ``true´´,
@@ -81,3 +90,25 @@ install:
 
 # Disable automatic builds with MSBuild, we use custom build steps instead.
 build: off
+
+
+# We use a generic python3 command to invoke the standard python version of
+# debian "bullseye". Nevertheless, let's create a virtual environment to keep
+# things separated.
+build_script:
+  - sh: python3 -m venv ~/venv-icf
+  - sh: . ~/venv-icf/bin/activate
+  - sh: python --version
+  - sh: python -m pip install -r requirements-devel.txt
+
+
+before_test:
+  # simple call to see if datalad and git-annex are installed properly
+  - datalad wtf
+
+
+test_script:
+  # run tests found in the $PROJECT_ROOT/test directory
+  - sh: mkdir __testhome__
+  - sh: cd __testhome__
+  - sh: pyton -m pytest tests
