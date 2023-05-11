@@ -115,4 +115,4 @@ test_script:
   # run tests found in the $PROJECT_ROOT/test directory
   - sh: mkdir __testhome__
   - sh: cd __testhome__
-  - sh: pyton -m pytest tests
+  - sh: python -m pytest ../tests
