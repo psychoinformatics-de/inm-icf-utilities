@@ -16,11 +16,11 @@ in the TAR archive are declared to be owned by root/root (uid/gid: 0/0) with
 by its contained DICOM `StudyDate/StudyTime` timestamps. The modification time
 for any non-DICOM file is set to the latest timestamp across all DICOM files.
 """
+import os
+import tarfile
 from datetime import datetime
 from hashlib import md5
-import os
 from pathlib import Path
-import tarfile
 from typing import Dict
 
 from tqdm import tqdm
@@ -34,6 +34,9 @@ from pydicom.valuerep import (
     TM,
 )
 from pydicom.errors import InvalidDicomError
+
+
+default_date = datetime(1970, 1, 1)
 
 
 def scan_dir(path: Path) -> Dict:
@@ -146,7 +149,8 @@ def main(input_base_dir: str,
     content = dict(scan_dir(input_base_dir))
     # for non-DICOM file the timestamp is `None`, determine "youngest"
     # timestamp and use in such cases
-    default_timestamp = sorted(v for v in content.values() if v)[-1]
+    default_timestamp = (
+        sorted(v for v in content.values() if v) or [default_date])[-1]
 
     write_archive(
         archive_path,

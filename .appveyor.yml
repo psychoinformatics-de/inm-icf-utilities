@@ -46,12 +46,12 @@ install:
       done
 
   # Run the ingestion script
-  - sh: python3 -m pip install -r requirements-devel.txt
+  - sh: sudo python3 -m pip install -r requirements-devel.txt
   - sh:
       for s in $STUDIES; do
-        bin/make_studyvisit_archive 
+        sudo bin/make_studyvisit_archive
           --output-dir "$STUDIES_DIR"
-          --id $s visit1
+          --id $s visit_1
           "$FROM_SCANNER";
       done
 
