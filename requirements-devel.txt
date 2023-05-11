@@ -1,5 +1,5 @@
 datalad
-datalad-next
+datalad-next>=1.0.0b2
 pydicom
 pytest
 tqdm

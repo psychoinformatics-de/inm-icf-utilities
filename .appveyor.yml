@@ -37,7 +37,7 @@ install:
   - sh: .appveyor/apache_enable_user_dir
 
   # Install git-annex that comes with the system
-  - sh: sudo apt-get -y install git-annex
+  - sh: sudo apt-get -y install git-annex -m snapshot
 
   # Install the python-venv package required on Ubuntu
   # TODO: this fixes the python version, can that be changed?
@@ -97,6 +97,7 @@ install:
       if [ X"$ACTIVATE_SSH_LOGIN" == "Xtrue" ]; then
         curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
       fi
+
 
 # Disable automatic builds with MSBuild, we use custom build steps instead.
 build: off
