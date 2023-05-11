@@ -2,7 +2,6 @@ from pathlib import Path
 
 from datalad.api import download
 from datalad.distribution.dataset import Dataset
-from datalad_next.utils import chpwd
 
 
 protocol = 'http'

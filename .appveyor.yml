@@ -21,7 +21,7 @@ environment:
 
   # Set this to true to activate the ssh login after the install steps are
   # executed.
-  ACTIVATE_SSH_LOGIN: false
+  ACTIVATE_SSH_LOGIN: true
 
 
 install:
@@ -36,8 +36,9 @@ install:
   - sh: sudo apt-get -y install apache2
   - sh: .appveyor/apache_enable_user_dir
 
-  # Install git-annex that comes with the system
-  - sh: sudo apt-get -y install git-annex -m snapshot
+  # Install git-annex
+  - sh: python3 -m pip install datalad-installer
+  - sh: datalad-installer --sudo ok git-annex -m snapshot
 
   # Install the python-venv package required on Ubuntu
   # TODO: this fixes the python version, can that be changed?
