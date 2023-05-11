@@ -33,7 +33,7 @@ install:
   # Create study directories
   - sh: <
       for s in $STUDIES;
-        do sudo mkdir -p "$DATA_DIR"/$s
+        do sudo mkdir -p "$DATA_DIR"/$s;
       done
 
   # Create user http content and create links to the studies in. The http server
@@ -42,7 +42,7 @@ install:
   - sh: mkdir ~/public_html
   - sh: <
       for s in $STUDIES; do
-        sudo ln -s "$DATA_DIR"/$s /home/appveyor/public_html/$s
+        sudo ln -s "$DATA_DIR"/$s /home/appveyor/public_html/$s;
       done
 
   # Enable basic authentication and authorization for the study directories. The
