@@ -46,7 +46,7 @@ install:
       done
 
   # Run the ingestion script
-  - sh: pip install -r requirements-devel.txt
+  - sh: python3 -m pip install -r requirements-devel.txt
   - sh:
       for s in $STUDIES; do
         bin/make_studyvisit_archive 
