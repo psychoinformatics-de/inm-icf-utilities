@@ -33,7 +33,7 @@ install:
   - sh: .appveyor/apache_enable_user_dir
 
   # Create data input directory and populate it
-  - sh: sudo mkdir "$FROM_SCANNER"
+  - sh: sudo mkdir -p "$FROM_SCANNER"
   - sh:
       for s in $STUDIES; do
         .appveyor/data_create_scanner_output $FROM_SCANNER $s 10 20
