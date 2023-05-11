@@ -27,8 +27,8 @@ install:
   - sh: .appveyor/apache_enable_user_dir
 
   # The root for study data and the studies that we simulate
-  - sh: DATA_DIR=/var/www/data
-  - sh: STUDIES="study_1 study_2"
+  - sh: export DATA_DIR=/var/www/data
+  - sh: export STUDIES="study_1 study_2"
 
   # Create study directories
   - sh:
