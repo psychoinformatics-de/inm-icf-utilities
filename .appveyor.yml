@@ -26,7 +26,8 @@ install:
   - sh: sudo apt-get -y install apache2
   - sh: .appveyor/apache_enable_user_dir
 
-  # The root for study data and the studies that we simulate
+  # The root for study data and the studies that we simulate. These variables
+  # are available in ``install:´´ and in the executed scripts.
   - sh: export DATA_DIR=/var/www/data
   - sh: export STUDIES="study_1 study_2"
 
