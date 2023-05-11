@@ -31,13 +31,19 @@ install:
   - sh: STUDIES="study_1 study_2"
 
   # Create study directories
-  - sh: for s in $STUDIES; do sudo mkdir -p "$DATA_DIR"/$s; done
+  - sh: <
+      for s in $STUDIES;
+        do sudo mkdir -p "$DATA_DIR"/$s
+      done
 
   # Create user http content and create links to the studies in. The http server
   # is configured to follow only links if the owner of the link matches the
   # owner of the target. Therefore, user ``root´´ has to create the links.
   - sh: mkdir ~/public_html
-  - sh: for s in $STUDIES; do sudo ln -s "$DATA_DIR"/$s /home/appveyor/public_html/$s
+  - sh: <
+      for s in $STUDIES; do
+        sudo ln -s "$DATA_DIR"/$s /home/appveyor/public_html/$s
+      done
 
   # Enable basic authentication and authorization for the study directories. The
   # username is ``test.user´´, the password is ``secret_1´´.
