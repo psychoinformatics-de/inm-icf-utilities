@@ -10,7 +10,7 @@
 
 
 # This version of Ubuntu is based on debian bullseye
-image: Ubuntu
+image: Ubuntu2004
 
 
 environment:
