@@ -21,7 +21,7 @@ environment:
 
   # Set this to true to activate the ssh login after the install steps are
   # executed.
-  ACTIVATE_SSH_LOGIN: true
+  ACTIVATE_SSH_LOGIN: false
 
   # The git-annex deb-package we want to use
   GIT_ANNEX_DEB: http://snapshot.debian.org/archive/debian/20210906T204127Z/pool/main/g/git-annex/git-annex_8.20210903-1_amd64.deb
@@ -121,6 +121,7 @@ build_script:
 
 
 before_test:
+  - sh: . ~/venv-icf/bin/activate
   # simple call to see if datalad and git-annex are installed properly
   - datalad wtf
 
@@ -129,4 +130,5 @@ test_script:
   # run tests found in the $PROJECT_ROOT/test directory
   - sh: mkdir __testhome__
   - sh: cd __testhome__
+  - sh: which python
   - sh: python -m pytest ../tests
