@@ -25,6 +25,15 @@ def test_example_unauthorized():
 
 
 def test_example_authorized(tmp_path: Path):
+    results = credentials(
+        'set',
+        name='test_cred',
+        spec={
+            'type': 'user_password',
+            'user': 'test.user',
+            'secret': 'secret_1'})
+    _check_results(results)
+
     with chpwd(tmp_path):
         results = download(
             f'{protocol}://localhost/~appveyor/study_1/visit_1_dicom.tar',
