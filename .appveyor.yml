@@ -118,6 +118,7 @@ build_script:
   # Install the latest version from pypi, even if it is a development or beta version
   - sh: python -m pip install --pre datalad-next
 
+
 before_test:
   # simple call to see if datalad and git-annex are installed properly
   - datalad wtf
