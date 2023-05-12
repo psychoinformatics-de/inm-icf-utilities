@@ -42,7 +42,7 @@ install:
 
   # Create a virtual env, that we use from hereon in
   - sh: python3 -m venv ~/venv-icf
-  - sh: source ~/venv-ifc/bin/activate
+  - sh: source ~/venv-icf/bin/activate
 
   # Install git-annex
   - sh: pip install datalad-installer
