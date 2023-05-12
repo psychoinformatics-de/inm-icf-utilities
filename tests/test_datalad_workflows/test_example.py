@@ -27,7 +27,7 @@ def test_example_unauthorized():
 def test_example_authorized(tmp_path: Path):
     results = credentials(
         'set',
-        name='test_cred',
+        name='test_creds',
         spec={
             'type': 'user_password',
             'user': 'test.user',
