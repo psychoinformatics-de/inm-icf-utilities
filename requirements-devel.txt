@@ -1,5 +1,7 @@
 datalad
-datalad-next>=1.0.0b2
 pydicom
 pytest
 tqdm
+
+# ``datalad-next´´ is not contained in here, becaue it will be
+# installed with ``pip install --pre datalad-next´´.

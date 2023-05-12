@@ -8,7 +8,9 @@ password="$1"; shift
 
 sudo htpasswd -bc /var/www/passwords "$user" "$password"
 
-cat > /tmp/htaccess <<EOF
+temp_htaccess=$(mktemp)
+
+cat > "$temp_htaccess" <<EOF
 AuthType Basic
 AuthName "Restricted study data"
 AuthBasicProvider file
@@ -18,8 +20,8 @@ EOF
 
 while [ "$*" ]; do
   echo Setting access restrictions for "$studies_dir"/"$1"
-  sudo cp /tmp/htaccess "$studies_dir"/"$1"/.htaccess
+  sudo cp "$temp_htaccess" "$studies_dir"/"$1"/.htaccess
   shift
 done
 
-rm -f /tmp/htaccess
+rm -f "$temp_htaccess"

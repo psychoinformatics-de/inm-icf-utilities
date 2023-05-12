@@ -23,6 +23,9 @@ environment:
   # executed.
   ACTIVATE_SSH_LOGIN: true
 
+  # The git-annex deb-package we want to use
+  GIT_ANNEX_DEB: http://snapshot.debian.org/archive/debian/20210906T204127Z/pool/main/g/git-annex/git-annex_8.20210903-1_amd64.deb
+
 
 install:
   # The root for study data and the studies that we simulate. These variables
@@ -36,21 +39,12 @@ install:
   - sh: sudo apt-get -y install apache2
   - sh: .appveyor/apache_enable_user_dir
 
-  # Install the python-venv package required on Ubuntu
-  # TODO: this fixes the python version, can that be changed?
+  # Install a sufficiently recent git annex version
+  - sh: .appveyor/install_git_annex $GIT_ANNEX_DEB
+
+    # Install the python-venv package required on Ubuntu
+  # TODO: this pins the python version, can that be changed?
   - sh: sudo apt-get -y install python3.8-venv
-
-  # Create a virtual env, that we use from hereon in
-  - sh: python3 -m venv ~/venv-icf
-  - sh: source ~/venv-icf/bin/activate
-
-  # Install git-annex
-  - sh: pip install datalad-installer
-  - sh:
-      if [ X"$ACTIVATE_SSH_LOGIN" == "Xtrue" ]; then
-        curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
-      fi
-  - sh: datalad-installer --sudo ok git-annex -m snapshot
 
   # Create data input directory and populate it
   - sh: sudo mkdir -p "$FROM_SCANNER"
@@ -95,7 +89,8 @@ install:
   # Set up git identification to supress warnings
   - git config --global user.email "test@appveyor.land"
   - git config --global user.name "Appveyor Almighty"
-  # enable "next" extension for patching datalad core
+
+  # Enable "next" extension for patching datalad core
   - git config --global datalad.extensions.load next
 
   # Enable external SSH access to CI worker on all other systems. This uses the
@@ -116,10 +111,12 @@ build: off
 # debian "bullseye". Nevertheless, let's create a virtual environment to keep
 # things separated.
 build_script:
+  - sh: python3 -m venv ~/venv-icf
   - sh: . ~/venv-icf/bin/activate
   - sh: python --version
   - sh: python -m pip install -r requirements-devel.txt
-
+  # Install the latest version from pypi, even if it is a development or beta version
+  - sh: python -m pip install --pre datalad-next
 
 before_test:
   # simple call to see if datalad and git-annex are installed properly
