@@ -19,11 +19,11 @@ environment:
   APPVEYOR_SSH_KEY: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0ou94Vnrz7iClYApJWv9FVOjT8uDgaF4Uf6wRW2VzLWD4/YwtxD5tsri9SfyQXFwVs94H0EAZSUz06VSM7uQwtOyeoHhERCfx0u+GC1UaFPLi20+4x7GLwipKLRWaf6dHfO5R4LkgDxH9Lc2KbzD0JYB7Lt4Hk54TWd1RaLuM0JGJCJc/0z5uQsyf6iH3Rf2Rcueoa61ztyjBwHaTJT8NOOtBATJXupN5c7Ss63hM7NecMdsalkLCnKQ3CwXQ8Wyp6w3XKvTlymJaWZBxBlA8MzVv89z9oReYnbWDzfWvNn4JU9JDcyOxTec/hd58vRZ+Pz1ZFU6WipoJ0gb0GBu/
   APPVEYOR_SSH_BLOCK: true
 
-  # Set this to `true` to activate the ssh login after the install-steps are
-  # executed.
+  # Set this to `after-install` to activate the ssh login after the
+  # install-steps are executed.
   # Set it to 'pre-test' to activate ssh login just before the tests are
   # executed.
-  ACTIVATE_SSH_LOGIN: pre-test
+  ACTIVATE_SSH_LOGIN: no
 
   # The git-annex deb-package we want to use
   GIT_ANNEX_DEB: http://snapshot.debian.org/archive/debian/20210906T204127Z/pool/main/g/git-annex/git-annex_8.20210903-1_amd64.deb
@@ -44,10 +44,6 @@ install:
   # Install a sufficiently recent git annex version
   - sh: .appveyor/install_git_annex $GIT_ANNEX_DEB
 
-    # Install the python-venv package required on Ubuntu
-  # TODO: this pins the python version, can that be changed?
-  - sh: sudo apt-get -y install python3.8-venv
-
   # Create data input directory and populate it
   - sh: sudo mkdir -p "$FROM_SCANNER"
   - sh:
@@ -62,7 +58,10 @@ install:
       done
 
   # Run the ingestion script
+  - sh: . ~/venv3.7/bin/activate
+  - sh: python3 -m pip install --upgrade pip
   - sh: sudo python3 -m pip install -r requirements-devel.txt
+  - sh: sudo python3 -m pip install --pre datalad-next
   - sh:
       for s in $STUDIES; do
         sudo bin/make_studyvisit_archive
@@ -100,7 +99,7 @@ install:
   # the worker waits with the continuation of the build beyond this point until
   # the file ``~/build.lock´´ is removed.
   - sh:
-      if [ X"$ACTIVATE_SSH_LOGIN" == "Xtrue" ]; then
+      if [ X"$ACTIVATE_SSH_LOGIN" == "Xafter-install" ]; then
         curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
       fi
 
@@ -113,17 +112,17 @@ build: off
 # debian "bullseye". Nevertheless, let's create a virtual environment to keep
 # things separated.
 build_script:
-  - sh: python3 -m venv ~/venv-icf
-  - sh: . ~/venv-icf/bin/activate
+  - sh: . ~/venv3.7/bin/activate
   - sh: python --version
-  - sh: python -m pip install --upgrade pip
+  # Install requirements
   - sh: python -m pip install -r requirements-devel.txt
   # Install the latest version from pypi, even if it is a development or beta version
   - sh: python -m pip install --pre datalad-next
 
 
 before_test:
-  - sh: . ~/venv-icf/bin/activate
+  - sh: . ~/venv3.7/bin/activate
+  - sh: python --version
   # simple call to see if datalad and git-annex are installed properly
   - datalad wtf
 
@@ -136,6 +135,6 @@ test_script:
   - sh: python --version
   - sh:
       if [ X"$ACTIVATE_SSH_LOGIN" == "Xpre-test" ]; then
-      curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
+        curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
       fi
   - sh: python -m pytest ../tests

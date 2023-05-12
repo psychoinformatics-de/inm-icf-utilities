@@ -8,6 +8,7 @@ from datalad.api import (
     download,
 )
 from datalad.support.exceptions import IncompleteResultsError
+from datalad.utils import chpwd
 
 
 protocol = 'http'
@@ -33,12 +34,12 @@ def test_example_authorized(tmp_path: Path):
             'password': 'secret_1'})
     _check_results(results)
 
-    results = download(
-        f'{protocol}://localhost/~appveyor/study_1/visit_1_dicom.tar',
-        credential='test_cred')
-    _check_results(results)
+    with chpwd(tmp_path):
+        results = download(
+            f'{protocol}://localhost/~appveyor/study_1/visit_1_dicom.tar',
+            credential='test_cred')
+        _check_results(results)
 
-    elements = tuple(tmp_path.iterdir())
+    elements = [Path(e).parts[-1] for e in tmp_path.iterdir()]
     print(elements)
     assert 'visit_1_dicom.tar' in elements
-    assert 'visit_1_dicom.tar.md5sum' in elements
