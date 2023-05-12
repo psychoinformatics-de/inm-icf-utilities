@@ -21,6 +21,7 @@ EOF
 while [ "$*" ]; do
   echo Setting access restrictions for "$studies_dir"/"$1"
   sudo cp "$temp_htaccess" "$studies_dir"/"$1"/.htaccess
+  sudo chmod 644 "$studies_dir"/"$1"/.htaccess
   shift
 done
 

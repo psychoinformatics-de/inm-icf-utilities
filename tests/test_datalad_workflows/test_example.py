@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pathlib import Path
 
 import pytest
@@ -12,6 +13,10 @@ from datalad.support.exceptions import IncompleteResultsError
 protocol = 'http'
 
 
+def _check_results(results: list[dict]):
+    assert all(result['status'] == 'ok' for result in results)
+
+
 def test_example_unauthorized():
     with pytest.raises(IncompleteResultsError):
         download(
@@ -19,19 +24,19 @@ def test_example_unauthorized():
 
 
 def test_example_authorized(tmp_path: Path):
-    res = credentials(
+    results = credentials(
         'set',
         name='test_cred',
         spec={
             'type': 'user_password',
             'user': 'test.user',
             'password': 'secret_1'})
-    assert res['status'] == 'ok'
+    _check_results(results)
 
-    res = download(
+    results = download(
         f'{protocol}://localhost/~appveyor/study_1/visit_1_dicom.tar',
         credential='test_cred')
-    assert res['status'] == 'ok'
+    _check_results(results)
 
     elements = tuple(tmp_path.iterdir())
     print(elements)
