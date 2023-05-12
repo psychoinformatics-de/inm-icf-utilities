@@ -114,6 +114,7 @@ build_script:
   - sh: python3 -m venv ~/venv-icf
   - sh: . ~/venv-icf/bin/activate
   - sh: python --version
+  - sh: python -m pip install --upgrade pip
   - sh: python -m pip install -r requirements-devel.txt
   # Install the latest version from pypi, even if it is a development or beta version
   - sh: python -m pip install --pre datalad-next

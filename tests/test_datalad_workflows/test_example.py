@@ -1,24 +1,39 @@
 from pathlib import Path
 
-from datalad.api import download
-from datalad.distribution.dataset import Dataset
+import pytest
+
+from datalad.api import (
+    credentials,
+    download,
+)
+from datalad.support.exceptions import IncompleteResultsError
 
 
 protocol = 'http'
 
 
-def test_example(tmp_path: Path):
-    dataset_path = tmp_path / 'ds'
-    dataset = Dataset(dataset_path).create()
+def test_example_unauthorized():
+    with pytest.raises(IncompleteResultsError):
+        download(
+            f'{protocol}://localhost/~appveyor/study_1/visit_1_dicom.tar')
 
-    res1 = download(
-        f'{protocol}://test.user:secret_1@localhost/'
-        f'~appveyor/study_1/visit_1_dicom.tar',
-        dataset=dataset)
-    res2 = download(
-        f'{protocol}://test.user:secret_1@localhost/'
-        f'~appveyor/study_1/visit_1_dicom.tar.md5sum',
-        dataset=dataset)
 
-    elements = dataset_path.iterdir()
+def test_example_authorized(tmp_path: Path):
+    res = credentials(
+        'set',
+        name='test_cred',
+        spec={
+            'type': 'user_password',
+            'user': 'test.user',
+            'password': 'secret_1'})
+    assert res['status'] == 'ok'
+
+    res = download(
+        f'{protocol}://localhost/~appveyor/study_1/visit_1_dicom.tar',
+        credential='test_cred')
+    assert res['status'] == 'ok'
+
+    elements = tuple(tmp_path.iterdir())
     print(elements)
+    assert 'visit_1_dicom.tar' in elements
+    assert 'visit_1_dicom.tar.md5sum' in elements
