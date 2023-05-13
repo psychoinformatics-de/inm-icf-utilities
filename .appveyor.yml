@@ -133,8 +133,9 @@ test_script:
   - sh: cd __testhome__
   - sh: which python
   - sh: python --version
+  - sh: env
   - sh:
       if [ X"$ACTIVATE_SSH_LOGIN" == "Xpre-tests" ]; then
         curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
       fi
-  - sh: python -m pytest ../tests
+  - sh: python -m pytest -s -v ../tests

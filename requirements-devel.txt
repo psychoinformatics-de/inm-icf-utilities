@@ -1,6 +1,7 @@
 datalad
 pydicom
 pytest
+pytest-env
 tqdm
 
 # ``datalad-next´´ is not contained in here, becaue it will be
