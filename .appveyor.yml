@@ -14,15 +14,11 @@ image: Ubuntu2004
 
 
 environment:
-  # Those are currently used to engineer the test VM. They will be removed,
-  # once the test VM is complete.
-  APPVEYOR_SSH_KEY: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0ou94Vnrz7iClYApJWv9FVOjT8uDgaF4Uf6wRW2VzLWD4/YwtxD5tsri9SfyQXFwVs94H0EAZSUz06VSM7uQwtOyeoHhERCfx0u+GC1UaFPLi20+4x7GLwipKLRWaf6dHfO5R4LkgDxH9Lc2KbzD0JYB7Lt4Hk54TWd1RaLuM0JGJCJc/0z5uQsyf6iH3Rf2Rcueoa61ztyjBwHaTJT8NOOtBATJXupN5c7Ss63hM7NecMdsalkLCnKQ3CwXQ8Wyp6w3XKvTlymJaWZBxBlA8MzVv89z9oReYnbWDzfWvNn4JU9JDcyOxTec/hd58vRZ+Pz1ZFU6WipoJ0gb0GBu/
-  APPVEYOR_SSH_BLOCK: true
-
   # Set this to `after-install` to activate the ssh login after the
   # install-steps are executed.
   # Set it to 'pre-tests' to activate ssh login just before the tests are
   # executed.
+  # This requires setting `APPVEYOR_SSH_KEY` and `APPVEYOR_SSH_BLOCK`
   ACTIVATE_SSH_LOGIN: no
 
   # The git-annex deb-package we want to use
