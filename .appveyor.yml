@@ -26,8 +26,8 @@ environment:
 
   # The root for study data and the studies that we simulate. These variables
   # are available throughout ``install:´´ and in the executed scripts.
-  FROM_SCANNER: /var/inm/input
-  STUDIES_DIR: /var/www/data
+  FROM_SCANNER: /data/incoming
+  STUDIES_DIR: /data/archive
   STUDIES: "study_1 study_2"
 
 install:
