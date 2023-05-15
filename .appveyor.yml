@@ -24,13 +24,13 @@ environment:
   # The git-annex deb-package we want to use
   GIT_ANNEX_DEB: http://snapshot.debian.org/archive/debian/20210906T204127Z/pool/main/g/git-annex/git-annex_8.20210903-1_amd64.deb
 
-
-install:
   # The root for study data and the studies that we simulate. These variables
   # are available throughout ``install:´´ and in the executed scripts.
-  - sh: export FROM_SCANNER=/var/inm/input
-  - sh: export STUDIES_DIR=/var/www/data
-  - sh: export STUDIES="study_1 study_2"
+  FROM_SCANNER: /data/incoming
+  STUDIES_DIR: /data/archive
+  STUDIES: "study_1 study_2"
+
+install:
 
   # Install apache and enable user-dir serving
   - sh: sudo apt-get update
