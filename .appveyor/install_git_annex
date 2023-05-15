@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e -u
+
+# The first argument is the URL of the git-annex .deb-file
+git_annex_deb_url="$1"
+
+temp_file=$(mktemp tmp.XXXXXXXXXX.deb)
+curl -o "$temp_file" "$git_annex_deb_url"
+sudo dpkg -i "$temp_file"
+rm -f "$temp_file"

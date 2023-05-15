@@ -1,0 +1,137 @@
+# This setup tests ICF-related software and workflows. There are two elements
+# that have to be kept aligned with ICF's environment:
+#
+# 1. The input data structure should match the data that ICF receives from
+#    acquisition sides.
+#
+# 2. The software environment should match the environment on ICF's machines,
+#    i.e. the versions of: `git`, `git-annex`, `python`, `datalad`, and
+#    `datalad-next`.
+
+
+# This version of Ubuntu is based on debian bullseye
+image: Ubuntu2004
+
+
+environment:
+  # Set this to `after-install` to activate the ssh login after the
+  # install-steps are executed.
+  # Set it to 'pre-tests' to activate ssh login just before the tests are
+  # executed.
+  # This requires setting `APPVEYOR_SSH_KEY` and `APPVEYOR_SSH_BLOCK`
+  ACTIVATE_SSH_LOGIN: no
+
+  # The git-annex deb-package we want to use
+  GIT_ANNEX_DEB: http://snapshot.debian.org/archive/debian/20210906T204127Z/pool/main/g/git-annex/git-annex_8.20210903-1_amd64.deb
+
+
+install:
+  # The root for study data and the studies that we simulate. These variables
+  # are available throughout ``install:´´ and in the executed scripts.
+  - sh: export FROM_SCANNER=/var/inm/input
+  - sh: export STUDIES_DIR=/var/www/data
+  - sh: export STUDIES="study_1 study_2"
+
+  # Install apache and enable user-dir serving
+  - sh: sudo apt-get update
+  - sh: sudo apt-get -y install apache2
+  - sh: .appveyor/apache_enable_user_dir
+
+  # Install a sufficiently recent git annex version
+  - sh: .appveyor/install_git_annex $GIT_ANNEX_DEB
+
+  # Create data input directory and populate it
+  - sh: sudo mkdir -p "$FROM_SCANNER"
+  - sh:
+      for s in $STUDIES; do
+        .appveyor/data_create_scanner_output $FROM_SCANNER $s 10 20;
+      done
+
+  # Create study directories
+  - sh:
+      for s in $STUDIES; do
+        sudo mkdir -p "$STUDIES_DIR"/$s;
+      done
+
+  # Run the ingestion script
+  - sh: . ~/venv3.7/bin/activate
+  - sh: python3 -m pip install --upgrade pip
+  - sh: sudo python3 -m pip install -r requirements-devel.txt
+  - sh: sudo python3 -m pip install --pre datalad-next
+  - sh:
+      for s in $STUDIES; do
+        sudo bin/make_studyvisit_archive
+          --output-dir "$STUDIES_DIR"
+          --id $s visit_1
+          "$FROM_SCANNER";
+      done
+
+  # Create user http content and create links to the studies in. The http server
+  # is configured to follow only links if the owner of the link matches the
+  # owner of the target. Therefore, user ``root´´ has to create the links.
+  - sh: mkdir ~/public_html
+  - sh:
+      for s in $STUDIES; do
+        sudo ln -s "$STUDIES_DIR"/$s /home/appveyor/public_html/$s;
+      done
+
+  # Enable basic authentication and authorization for the study directories. The
+  # username is ``test.user´´, the password is ``secret_1´´.
+  - sh:
+      .appveyor/apache_enable_authentication
+        $STUDIES_DIR
+        test.user secret_1
+        $STUDIES
+
+  # Set up git identification to supress warnings
+  - git config --global user.email "test@appveyor.land"
+  - git config --global user.name "Appveyor Almighty"
+
+  # Enable "next" extension for patching datalad core
+  - git config --global datalad.extensions.load next
+
+  # Enable external SSH access to CI worker on all other systems. This uses the
+  # public key defined in APPVEYOR_SSH_KEY. If APPVEYOR_SSH_BLOCK is ``true´´,
+  # the worker waits with the continuation of the build beyond this point until
+  # the file ``~/build.lock´´ is removed.
+  - sh:
+      if [ X"$ACTIVATE_SSH_LOGIN" == "Xafter-install" ]; then
+        curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
+      fi
+
+
+# Disable automatic builds with MSBuild, we use custom build steps instead.
+build: off
+
+
+# We use a generic python3 command to invoke the standard python version of
+# debian "bullseye". Nevertheless, let's create a virtual environment to keep
+# things separated.
+build_script:
+  - sh: . ~/venv3.7/bin/activate
+  - sh: python --version
+  # Install requirements
+  - sh: python -m pip install -r requirements-devel.txt
+  # Install the latest version from pypi, even if it is a development or beta version
+  - sh: python -m pip install --pre datalad-next
+
+
+before_test:
+  - sh: . ~/venv3.7/bin/activate
+  - sh: python --version
+  # simple call to see if datalad and git-annex are installed properly
+  - datalad wtf
+
+
+test_script:
+  # run tests found in the $PROJECT_ROOT/test directory
+  - sh: mkdir __testhome__
+  - sh: cd __testhome__
+  - sh: which python
+  - sh: python --version
+  - sh: env
+  - sh:
+      if [ X"$ACTIVATE_SSH_LOGIN" == "Xpre-tests" ]; then
+        curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
+      fi
+  - sh: python -m pytest -s -v ../tests

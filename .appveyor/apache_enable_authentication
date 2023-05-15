@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -e -u
+
+studies_dir="$1"; shift
+user="$1"; shift
+password="$1"; shift
+
+sudo htpasswd -bc /var/www/passwords "$user" "$password"
+
+temp_htaccess=$(mktemp)
+
+cat > "$temp_htaccess" <<EOF
+AuthType Basic
+AuthName "Restricted study data"
+AuthBasicProvider file
+AuthUserFile "/var/www/passwords"
+Require user test.user
+EOF
+
+while [ "$*" ]; do
+  echo Setting access restrictions for "$studies_dir"/"$1"
+  sudo cp "$temp_htaccess" "$studies_dir"/"$1"/.htaccess
+  sudo chmod 644 "$studies_dir"/"$1"/.htaccess
+  shift
+done
+
+rm -f "$temp_htaccess"
