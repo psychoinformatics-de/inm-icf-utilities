@@ -36,11 +36,10 @@ install:
   - sh: .appveyor/apache_enable_user_dir
   # Install a sufficiently recent git annex version
   - sh: .appveyor/install_git_annex $GIT_ANNEX_DEB
-  # Install tooling for data ingestion
-  - sh: . ~/venv3.7/bin/activate
-  - sh: python3 -m pip install --upgrade pip
-  - sh: sudo python3 -m pip install -r requirements-devel.txt
-  - sh: sudo python3 -m pip install --pre datalad-next
+  # Install tooling for data ingestion.
+  # ICF uses a system installation via APT. Here we only match the respective
+  # versions of Debian bullseye (the Ubuntu 2004 base image is too old)
+  - sh: sudo python3 -m pip install pydicom==2.0.0 tqdm==4.57.0
 
   # Bootstrap ICF data organization
   # Create data input directory and populate it
