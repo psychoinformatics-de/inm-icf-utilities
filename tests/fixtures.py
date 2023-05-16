@@ -19,13 +19,19 @@ def dataaccess_credential():
     )
 
 
-@pytest.fixture(autouse=False, scope='session')
-def dicom_server(dataaccess_credential):
+@pytest.fixture(autouse=False, scope="session")
+def test_study_names():
+    studies = []
     if os.environ.get('APPVEYOR', None) == 'true':
-        yield dict(
-            base_url='http://localhost/~appveyor',
-            studies=os.environ['STUDIES'].split(),
-        )
+        studies = os.environ['STUDIES'].split()
+    yield studies
+
+
+@pytest.fixture(autouse=False, scope='session')
+def data_webserver(dataaccess_credential):
+    """Yields a URL to a webserver providing data access"""
+    if os.environ.get('APPVEYOR', None) == 'true':
+        yield 'http://localhost/~appveyor'
     else:
         study_dir = os.environ.get(local_eny_key, None)
         if not study_dir:
@@ -41,7 +47,4 @@ def dicom_server(dataaccess_credential):
                   dataaccess_credential['secret'])
         )
         with server:
-            yield dict(
-                base_url=server.url,
-                studies=[],
-            )
+            yield server.url
