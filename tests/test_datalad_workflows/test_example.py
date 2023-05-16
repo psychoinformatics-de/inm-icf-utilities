@@ -23,7 +23,7 @@ def test_example_unauthorized(dicom_server):
             result_renderer='disabled')
 
 
-def test_example_authorized(dicom_server, tmp_path: Path):
+def test_example_authorized(dicom_server, tmp_path: Path, tmp_keyring):
     print(dicom_server)
     results = credentials(
         'set',
