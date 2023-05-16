@@ -4,7 +4,6 @@ from pathlib import Path
 import pytest
 
 from datalad.api import (
-    credentials,
     download,
 )
 from datalad.support.exceptions import IncompleteResultsError
@@ -23,21 +22,17 @@ def test_example_unauthorized(dicom_server):
             result_renderer='disabled')
 
 
-def test_example_authorized(dicom_server, tmp_path: Path, tmp_keyring):
+def test_example_authorized(
+    dicom_server, tmp_path: Path, tmp_keyring,
+    dataaccess_credential, credman,
+):
     print(dicom_server)
-    results = credentials(
-        'set',
-        name='test_creds',
-        spec={
-            'type': 'user_password',
-            'user': dicom_server['user'],
-            'secret': dicom_server['secret']})
-    _check_results(results)
+    credman.set(**dataaccess_credential)
 
     with chpwd(tmp_path):
         results = download(
             f'{dicom_server["base_url"]}/study_1/visit_1_dicom.tar',
-            credential='test_creds',
+            credential=dataaccess_credential['name'],
             result_renderer='disabled')
         _check_results(results)
 

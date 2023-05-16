@@ -26,4 +26,5 @@ from datalad_next.tests.fixtures import (
 
 from .fixtures import (
     dicom_server,
+    dataaccess_credential,
 )

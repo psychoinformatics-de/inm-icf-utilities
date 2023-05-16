@@ -9,14 +9,23 @@ from datalad_next.tests.utils import HTTPPath
 local_eny_key = 'INM_ICF_TEST_STUDIES'
 
 
+@pytest.fixture(autouse=False, scope="session")
+def dataaccess_credential():
+    yield dict(
+        name='icf-credential',
+        user='test.user',
+        secret='secret_1',
+        type='user_password',
+    )
+
+
 @pytest.fixture(autouse=False, scope='session')
-def dicom_server():
+def dicom_server(dataaccess_credential):
     if os.environ.get('APPVEYOR', None) == 'true':
         yield dict(
             base_url='http://localhost/~appveyor',
             studies=os.environ['STUDIES'].split(),
-            user='test.user',
-            secret='secret_1')
+        )
     else:
         study_dir = os.environ.get(local_eny_key, None)
         if not study_dir:
@@ -28,11 +37,11 @@ def dicom_server():
                 f'contains study data, as defined in RFD0034.')
         server = HTTPPath(
             study_dir,
-            auth=('test.user.local', 'secret_1_local')
+            auth=(dataaccess_credential['user'],
+                  dataaccess_credential['secret'])
         )
         with server:
             yield dict(
                 base_url=server.url,
                 studies=[],
-                user='test.user.local',
-                secret='secret_1_local')
+            )
