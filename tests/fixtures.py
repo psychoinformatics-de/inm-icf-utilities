@@ -38,9 +38,9 @@ def data_webserver(dataaccess_credential):
             raise ValueError(
                 'Cannot execute tests locally, because the environment '
                 f'variable ``{local_eny_key}´´ is not defined. Set the '
-                f'environment variable ``{local_eny_key}´´ in a startup '
-                f'script, e.g. ~/.bashrc, to point to a local directory that '
-                f'contains study data, as defined in RFD0034.')
+                f'environment variable ``{local_eny_key}´´ to point to '
+                f'a local directory that contains study data, as defined '
+                f'in RFD0034.')
         server = HTTPPath(
             study_dir,
             auth=(dataaccess_credential['user'],

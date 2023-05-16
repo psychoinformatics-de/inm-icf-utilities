@@ -15,7 +15,7 @@ url_base="https://github.com/datalad/example-dicom-structural/raw/master/dicoms/
 dicom_hierarchy=${study}_7T8088/incoming/${study}/654321_7T8088/SCANS/1/DICOM
 dicom_base_name=1.3.12.2.1107.5.2.0.79109.30000021070907115904000000007-1
 target_dir="$from_scanner_dir"/"$dicom_hierarchy"
-sudo mkdir -p "$target_dir"
+mkdir -p "$target_dir"
 
 # Copy N2D_<lower>.dcm to N2D_<upper>.dcm to $from_scanner_dir
 while [ "$lower" -le "$upper" ]; do
@@ -26,12 +26,12 @@ while [ "$lower" -le "$upper" ]; do
   target_name="$target_dir"/"$dicom_name"
 
   echo copying "$url" "->" "$target_name"
-  sudo curl -s -o "$target_name" "$url"
+  curl -s -L -o "$target_name" "$url"
 
   lower=$(( "$lower" + 1 ))
 done
 
 # Create a non-DICOM file to allow testing for correct mtime setting
-cat <<EOF | sudo tee "$target_dir"/info.xml > /dev/null
+cat <<EOF | tee "$target_dir"/info.xml > /dev/null
 <xml><info>This is not a DICOM file</info></xml>
 EOF
