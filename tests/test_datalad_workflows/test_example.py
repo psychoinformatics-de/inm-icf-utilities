@@ -6,7 +6,7 @@ import pytest
 from datalad.api import (
     download,
 )
-from datalad.support.exceptions import IncompleteResultsError
+from datalad_next.exceptions import IncompleteResultsError
 from datalad_next.tests.utils import assert_status
 
 
