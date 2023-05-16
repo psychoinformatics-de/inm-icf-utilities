@@ -14,12 +14,18 @@ image: Ubuntu2004
 
 
 environment:
-  # Set this to `after-install` to activate the ssh login after the
+  # Set this to `post-install` to activate the ssh login after the
   # install-steps are executed.
   # Set it to 'pre-tests' to activate ssh login just before the tests are
   # executed.
   # This requires setting `APPVEYOR_SSH_KEY` and `APPVEYOR_SSH_BLOCK`
   ACTIVATE_SSH_LOGIN: no
+
+  # The following variables should be kept in sync with INM-ICF's
+  # system configuration.
+  ICF_PYTHON_VERSION: 3.9
+  ICF_GIT_VERSION: 2.30.2
+  ICF_GIT_ANNEX_VERSION: 10.20221003
 
   INSTALL_GITANNEX: git-annex -m snapshot
 
@@ -45,7 +51,7 @@ install:
   - sudo mkdir -p "$FROM_SCANNER"
   - sh:
       for s in $STUDIES; do
-        .appveyor/data_create_scanner_output $FROM_SCANNER $s 10 20;
+        sudo .appveyor/data_create_scanner_output $FROM_SCANNER $s 10 20;
       done
   # Create study directories
   - sh:
@@ -82,7 +88,7 @@ install:
   # the worker waits with the continuation of the build beyond this point until
   # the file ``~/build.lock´´ is removed.
   - sh:
-      if [ X"$ACTIVATE_SSH_LOGIN" == "Xafter-install" ]; then
+      if [ X"$ACTIVATE_SSH_LOGIN" == "Xpost-install" ]; then
         curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
       fi
 
@@ -109,6 +115,9 @@ build_script:
   - "[ -f ${HOME}/dlinstaller_env.sh ] && . ${HOME}/dlinstaller_env.sh || true"
   # all remaining deps after git-annex
   - python -m pip install -r requirements-devel.txt
+
+  # Check program versions and report
+  - .appveyor/check_versions --warn-only ${ICF_PYTHON_VERSION} ${ICF_GIT_VERSION} ${ICF_GIT_ANNEX_VERSION}
 
 
 before_test:
