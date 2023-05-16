@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -e -u
+
+apt-get update -qq
+apt-get install eatmydata
+eatmydata apt-get -y install apache2
