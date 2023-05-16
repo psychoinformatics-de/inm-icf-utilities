@@ -108,8 +108,6 @@ build_script:
   - python --version
   # Install requirements
   - python -m pip install -r requirements-devel.txt
-  # Install the latest version from pypi, even if it is a development or beta version
-  - python -m pip install --pre datalad-next
 
 
 before_test:
