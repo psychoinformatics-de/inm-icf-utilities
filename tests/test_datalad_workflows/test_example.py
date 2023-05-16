@@ -10,9 +10,6 @@ from datalad.api import (
 from datalad.support.exceptions import IncompleteResultsError
 from datalad.utils import chpwd
 
-# Fixture to get the configuration of the test environment
-from ..environment import dicom_server
-
 
 def _check_results(results: list[dict]):
     assert all(result['status'] == 'ok' for result in results)
