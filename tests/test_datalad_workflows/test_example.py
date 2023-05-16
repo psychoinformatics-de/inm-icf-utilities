@@ -7,7 +7,6 @@ from datalad.api import (
     download,
 )
 from datalad.support.exceptions import IncompleteResultsError
-from datalad.utils import chpwd
 
 
 def _check_results(results: list[dict]):
@@ -27,12 +26,13 @@ def test_example_authorized(
 ):
     credman.set(**dataaccess_credential)
 
-    with chpwd(tmp_path):
-        results = download(
-            f'{data_webserver}/study_1/visit_1_dicom.tar',
-            credential=dataaccess_credential['name'],
-            result_renderer='disabled')
-        _check_results(results)
+    target_file = tmp_path / 'visit_1_dicom.tar'
 
-    elements = [Path(e).parts[-1] for e in tmp_path.iterdir()]
-    assert 'visit_1_dicom.tar' in elements
+    results = download(
+        {f'{data_webserver}/study_1/visit_1_dicom.tar': target_file},
+        credential=dataaccess_credential['name'],
+        result_renderer='disabled',
+    )
+    _check_results(results)
+
+    assert target_file.exists()
