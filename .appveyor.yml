@@ -21,7 +21,7 @@ environment:
   # This requires setting `APPVEYOR_SSH_KEY` and `APPVEYOR_SSH_BLOCK`
   ACTIVATE_SSH_LOGIN: no
 
-  INSTALL_GITANNEX: git-annex=10.20221003 -m datalad/git-annex:release
+  INSTALL_GITANNEX: git-annex -m snapshot
 
   # The root for study data and the studies that we simulate. These variables
   # are available throughout ``install:´´ and in the executed scripts.
