@@ -33,17 +33,17 @@ environment:
 install:
   # Bootstrap ICF-like system installation
   - sudo .appveyor/install_apt_pkgs
-  - sh: .appveyor/apache_enable_user_dir
+  - .appveyor/apache_enable_user_dir
   # Install a sufficiently recent git annex version
-  - sh: .appveyor/install_git_annex $GIT_ANNEX_DEB
+  - .appveyor/install_git_annex $GIT_ANNEX_DEB
   # Install tooling for data ingestion.
   # ICF uses a system installation via APT. Here we only match the respective
   # versions of Debian bullseye (the Ubuntu 2004 base image is too old)
-  - sh: sudo python3 -m pip install pydicom==2.0.0 tqdm==4.57.0
+  - sudo python3 -m pip install pydicom==2.0.0 tqdm==4.57.0
 
   # Bootstrap ICF data organization
   # Create data input directory and populate it
-  - sh: sudo mkdir -p "$FROM_SCANNER"
+  - sudo mkdir -p "$FROM_SCANNER"
   - sh:
       for s in $STUDIES; do
         .appveyor/data_create_scanner_output $FROM_SCANNER $s 10 20;
@@ -56,7 +56,7 @@ install:
   # Create user http content and create links to the studies in. The http server
   # is configured to follow only links if the owner of the link matches the
   # owner of the target. Therefore, user ``root´´ has to create the links.
-  - sh: mkdir ~/public_html
+  - mkdir ~/public_html
   - sh:
       for s in $STUDIES; do
         sudo ln -s "$STUDIES_DIR"/$s /home/appveyor/public_html/$s;
@@ -102,30 +102,30 @@ build_script:
   # Enable "next" extension for patching datalad core
   - git config --global datalad.extensions.load next
 
-  - sh: . ~/venv3.7/bin/activate
-  - sh: python --version
+  - . ~/venv3.7/bin/activate
+  - python --version
   # Install requirements
-  - sh: python -m pip install -r requirements-devel.txt
+  - python -m pip install -r requirements-devel.txt
   # Install the latest version from pypi, even if it is a development or beta version
-  - sh: python -m pip install --pre datalad-next
+  - python -m pip install --pre datalad-next
 
 
 before_test:
-  - sh: . ~/venv3.7/bin/activate
-  - sh: python --version
+  - . ~/venv3.7/bin/activate
+  - python --version
   # simple call to see if datalad and git-annex are installed properly
   - datalad wtf
 
 
 test_script:
   # run tests found in the $PROJECT_ROOT/test directory
-  - sh: mkdir __testhome__
-  - sh: cd __testhome__
-  - sh: which python
-  - sh: python --version
-  - sh: env
+  - mkdir __testhome__
+  - cd __testhome__
+  - which python
+  - python --version
+  - env
   - sh:
       if [ X"$ACTIVATE_SSH_LOGIN" == "Xpre-tests" ]; then
         curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
       fi
-  - sh: python -m pytest -s -v ../tests
+  - python -m pytest -s -v ../tests
