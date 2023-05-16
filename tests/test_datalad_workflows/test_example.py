@@ -7,10 +7,7 @@ from datalad.api import (
     download,
 )
 from datalad.support.exceptions import IncompleteResultsError
-
-
-def _check_results(results: list[dict]):
-    assert all(result['status'] == 'ok' for result in results)
+from datalad_next.tests.utils import assert_status
 
 
 def test_example_unauthorized(data_webserver):
@@ -32,7 +29,7 @@ def test_example_authorized(
         {f'{data_webserver}/study_1/visit_1_dicom.tar': target_file},
         credential=dataaccess_credential['name'],
         result_renderer='disabled',
+        on_failure='ignore',
     )
-    _check_results(results)
-
+    assert_status('ok', results)
     assert target_file.exists()
