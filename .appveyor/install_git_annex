@@ -1,11 +1,14 @@
 #!/bin/bash
-
+#
+# Install git-annex. Any environment setup to source would be
+# written to ${HOME}/dlinstaller_env.sh
+#
 set -e -u
 
-# The first argument is the URL of the git-annex .deb-file
-git_annex_deb_url="$1"
+# no install requested -> exit
+[ -z "$1" ] && exit 0 || true
 
-temp_file=$(mktemp tmp.XXXXXXXXXX.deb)
-curl -o "$temp_file" "$git_annex_deb_url"
-sudo dpkg -i "$temp_file"
-rm -f "$temp_file"
+# assumes a virtualenv or equivalent python env
+# get the installer for this
+python -m pip install datalad-installer${DATALAD_INSTALLER_VERSION:-}
+datalad-installer -E ${HOME}/dlinstaller_env.sh --sudo ok $*

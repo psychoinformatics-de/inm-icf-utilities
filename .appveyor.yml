@@ -21,8 +21,7 @@ environment:
   # This requires setting `APPVEYOR_SSH_KEY` and `APPVEYOR_SSH_BLOCK`
   ACTIVATE_SSH_LOGIN: no
 
-  # The git-annex deb-package we want to use
-  GIT_ANNEX_DEB: http://snapshot.debian.org/archive/debian/20210906T204127Z/pool/main/g/git-annex/git-annex_8.20210903-1_amd64.deb
+  INSTALL_GITANNEX: git-annex=10.20221003 -m datalad/git-annex:release
 
   # The root for study data and the studies that we simulate. These variables
   # are available throughout ``install:´´ and in the executed scripts.
@@ -36,8 +35,6 @@ install:
   # Bootstrap ICF-like system installation
   - sudo .appveyor/install_apt_pkgs
   - .appveyor/apache_enable_user_dir
-  # Install a sufficiently recent git annex version
-  - .appveyor/install_git_annex $GIT_ANNEX_DEB
   # Install tooling for data ingestion.
   # ICF uses a system installation via APT. Here we only match the respective
   # versions of Debian bullseye (the Ubuntu 2004 base image is too old)
@@ -105,8 +102,12 @@ build_script:
 
   # install into virtual env that matches the Python version on the ICF system
   - . ~/venv3.9/bin/activate
-  - python --version
   # Install requirements
+  # git-annex
+  - .appveyor/install_git_annex ${INSTALL_GITANNEX}
+  # enable the git-annex provisioned by the installer
+  - "[ -f ${HOME}/dlinstaller_env.sh ] && . ${HOME}/dlinstaller_env.sh || true"
+  # all remaining deps after git-annex
   - python -m pip install -r requirements-devel.txt
 
 
