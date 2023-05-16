@@ -30,6 +30,8 @@ environment:
   STUDIES_DIR: /data/archive
   STUDIES: "study_1 study_2"
 
+
+# In `install` we prep the test system with any non-DataLad tooling
 install:
   # Bootstrap ICF-like system installation
   - sudo .appveyor/install_apt_pkgs
@@ -92,9 +94,8 @@ install:
 build: off
 
 
-# We use a generic python3 command to invoke the standard python version of
-# debian "bullseye". Nevertheless, let's create a virtual environment to keep
-# things separated.
+# In `build` and `*test*` we perform the actual deployment and validation
+# of the DataLad-tooling
 build_script:
   # Set up git identification
   - git config --global user.email "test@appveyor.land"
@@ -102,7 +103,8 @@ build_script:
   # Enable "next" extension for patching datalad core
   - git config --global datalad.extensions.load next
 
-  - . ~/venv3.7/bin/activate
+  # install into virtual env that matches the Python version on the ICF system
+  - . ~/venv3.9/bin/activate
   - python --version
   # Install requirements
   - python -m pip install -r requirements-devel.txt
@@ -111,8 +113,6 @@ build_script:
 
 
 before_test:
-  - . ~/venv3.7/bin/activate
-  - python --version
   # simple call to see if datalad and git-annex are installed properly
   - datalad wtf
 
