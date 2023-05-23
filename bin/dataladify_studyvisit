@@ -6,8 +6,23 @@ import os
 from pathlib import Path
 import tempfile
 
+# this implementation works with pydicom 2x
+from pydicom import dcmread
+
 import datalad.api as dl
 from datalad.utils import md5sum
+
+# which DICOM tags to extract from DICOM files and store as
+# git-annex metadata (e.g., to enable metadata-driven views
+# of visit datasets)
+dicom_metadata_keys = [
+    "SeriesDescription",
+    "SeriesNumber",
+    "Modality",
+    "MRAcquisitionType",
+    "ProtocolName",
+    "PulseSequenceName",
+]
 
 
 def get_repo_path(
@@ -99,21 +114,43 @@ def runshit(wdir, tarpath, tarurl, repopath):
     dlarchives_uuid = repo.call_annex_records(
         ['info', 'datalad-archives'])[0]['uuid']
     assert dlarchives_uuid
-    dicoms = [
-        dict(path=str(r['item']), md5=r['hash-md5'], size=r['size'])
-        for r in dl.ls_file_collection(
+    dicoms = []
+    for r in dl.ls_file_collection(
             'tarfile',
             tarpath,
             hash=['md5'],
             result_renderer='disabled',
-            return_type='generator')
-        if r.get('type') == 'file'
-    ]
+            return_type='generator'):
+        fp = r.get('fp')
+        if fp is None:
+            # not a file
+            continue
+        d = dict(path=str(r['item']), md5=r['hash-md5'], size=r['size'])
+        # rewind file pointer to ready for dcmread()
+        fp.seek(0)
+        with dcmread(
+                fp,
+                stop_before_pixels=True,
+                specific_tags=dicom_metadata_keys,
+        ) as dcm:
+            # extract target DICOM tags for metadata
+            d.update({
+                dmk: getattr(dcm, dmk, '')
+                for dmk in dicom_metadata_keys
+            })
+        dicoms.append(d)
+
     dicom_recs = ds.addurls(
         dicoms,
         f'dl+archive:{tarkey}#path={{path}}&size={{size}}',
         '{path}',
         key='et:MD5-s{size}--{md5}',
+        # field names are limited to alphanumerics (and [_-.]),
+        # and are case insensitive
+        meta=[
+            f'{dmk.lower()}={{{dmk}}}'
+            for dmk in dicom_metadata_keys
+        ],
     )
     # assure availability for each DICOM
     for dicomkey in [
