@@ -25,21 +25,19 @@ dicom_metadata_keys = [
 ]
 
 
-def get_repo_path(
-        output_base_dir: Path, study_id: str, visit_id: str) -> Path:
-    return output_base_dir / study_id / f'{visit_id}_datalad'
-
-
 def main(store_dir: str,
          study_id: str,
          visit_id: str):
     store_base_dir = Path(store_dir)
     # where to deposit the final datalad dataset
-    repo_path = store_base_dir / study_id / f'{visit_id}_datalad'
-    if repo_path.exists():
+    repo_base_path = store_base_dir / study_id / f'{visit_id}_'
+    deposit_conflicts = [str(p) for p in repo_base_path.parent.glob(
+        f'{repo_base_path.name}XDLRA*')]
+    if deposit_conflicts:
         # be safe
         raise ValueError(
-            f'{repo_path} already exists, refusing to overwrite')
+            f'existing dataset deposit {deposit_conflicts}, '
+            'refusing to overwrite')
     # locate input tarball
     tar_path = store_base_dir / study_id / f'{visit_id}_dicom.tar'
     if not tar_path.exists():
@@ -54,11 +52,11 @@ def main(store_dir: str,
             # source visit tarball URL
             f'https://some.base.url/{study_id}/{tar_path.name}',
             # path to deposit the repo at
-            repo_path,
+            repo_base_path.absolute(),
         )
 
 
-def runshit(wdir, tarpath, tarurl, repopath):
+def runshit(wdir, tarpath, tarurl, repobasepath):
     ds = dl.create(wdir)
     # alias for speed, `.repo` is really expensive
     repo = ds.repo
@@ -159,11 +157,18 @@ def runshit(wdir, tarpath, tarurl, repopath):
     ]:
         repo.call_annex(['setpresentkey', dicomkey, dlarchives_uuid, '1'])
 
-    repopath.mkdir()
     repo.call_git([
         'remote', 'add', 'icfstore',
-        # we gain several levels of useless subdirectories :(
-        f'datalad-annex::file://{repopath}?type=directory&directory={{path}}&encryption=none'
+        # this is a little twisted:
+        # the first line is an f-string, because we need to get the base URL
+        # pointing to the study directory into the remote URL
+        f'datalad-annex::?type=external&externaltype=uncurl&url=file://{repobasepath}'
+        # this second line is NOT an f-string, and braces are quoted!!
+        # this is because datalad-annex:: will pass this URL to uncurl
+        # (removing the quoting; it can do placeholders too!), and uncurl
+        # will then fill in the annex key of the deposit in order to get
+        # the final upload URL
+        '{{annex_key}}&encryption=none'
     ])
     ds.push(
         to='icfstore',
@@ -171,8 +176,6 @@ def runshit(wdir, tarpath, tarurl, repopath):
         # and there also should be none
         data='nothing',
     )
-    # some cleanup
-    (repopath / 'tmp').rmdir()
 
 
 if __name__ == '__main__':
