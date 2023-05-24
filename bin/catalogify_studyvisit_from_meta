@@ -1,0 +1,265 @@
+#!/usr/bin/env python3
+"""
+
+"""
+from datetime import datetime
+import json
+import math
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+from uuid import uuid4
+
+import datalad.api as dl
+from datalad_catalog.catalog import Catalog
+from datalad_catalog.webcatalog import WebCatalog
+
+# this points to the top of the ICF data store.
+# internally it will be amended with the missing components
+# for study and visit deposit locations
+icfstore_baseurl = 'https://data.inm-icf.de'
+
+# which DICOM tags to extract from DICOM files and store as
+# git-annex metadata (e.g., to enable metadata-driven views
+# of visit datasets)
+dicom_metadata_keys = [
+    "SeriesDescription",
+    "SeriesNumber",
+    "Modality",
+    "MRAcquisitionType",
+    "ProtocolName",
+    "PulseSequenceName",
+]
+
+# Instantiate interface object for api
+catalog_api = Catalog()
+
+
+def main(store_dir: str,
+         study_id: str,
+         visit_id: str):
+    store_base_dir = Path(store_dir)
+    # where to add the catalog entry
+    study_catalog_path = store_base_dir / study_id / f'{study_id}_catalog'
+    # locate metadata files
+    dataset_metadata_path = store_base_dir / study_id / \
+        f'{visit_id}_metadata_tarball.json'
+    file_metadata_path = store_base_dir / study_id / \
+        f'{visit_id}_metadata_dicoms.json'
+    # Grab or create the catalog (WebCatalog class)
+    # (creating includes generating and adding a study entry for the catalog)
+    ctlg = get_catalog(study_id, study_catalog_path)
+    # Generate and add a visit entry for the catalog
+    visit_entry = generate_visit_entry(
+        study_id,
+        visit_id,
+        dataset_metadata_path,
+        file_metadata_path)
+    add_to_catalog(visit_entry, str(study_catalog_path))
+    # Add visit entry as subdataset to study entry
+    super_dict = read_json_file(ctlg.location / 'metadata' / 'super.json')
+    subdatasets = [
+        {
+            'dataset_id': visit_entry['dataset_id'],
+            'dataset_version': visit_entry['dataset_version'],
+            'dataset_path': visit_id,
+        }
+    ]
+    update_entry(
+        super_dict['dataset_id'],
+        super_dict['dataset_version'],
+        study_id,
+        'subdatasets',
+        subdatasets,
+        study_catalog_path)
+
+
+def get_catalog(study_id, catalog_path):
+    """"""
+    package_path = Path(__file__).resolve().parent.parent
+    # Instantiate WebCatalog object
+    ctlg = WebCatalog(
+        location=str(catalog_path),
+        config_file=str(package_path / 'assets' / 'catalog_config.json'),
+        catalog_action='create',
+    )
+    # If catalog does not exist:
+    if not ctlg.is_created():
+        # 1. create it
+        ctlg.create()
+        # 2. generate and add the study-level catalog entry
+        study_entry = generate_study_entry(study_id)
+        add_to_catalog(study_entry, str(catalog_path))
+        # 3. set catalog home page
+        ctlg.main_id = study_entry.get('dataset_id')
+        ctlg.main_version = study_entry.get('dataset_version')
+        ctlg.set_main_dataset() 
+    return ctlg
+
+
+def generate_study_entry(study_id):
+    """"""
+    desc=f"""This data catalog presents the DICOM data collected
+    for all visits of the study: {study_id}. Browse through details
+    of all study visits in the 'Subdatasets' tab below."""
+    return new_dataset_meta_item(
+        ds_id=str(uuid4()),
+        ds_version='latest',
+        ds_name=study_id,
+        ds_description=desc)
+    
+
+def update_entry(ds_id, ds_version, ds_name, key, value, study_catalog_path):
+    meta_item = {
+        'type': 'dataset',
+        'dataset_id': ds_id,
+        'dataset_version': ds_version,
+        'name': ds_name,
+        'metadata_sources': get_metadata_source(),
+    }
+    meta_item.update({key: value})
+    add_to_catalog(meta_item, str(study_catalog_path))
+    return meta_item
+
+
+def generate_visit_entry(study_id, visit_id, metapath_dataset, metapath_file):
+    """"""
+        # Create base visit entry
+    desc=f"""This page presents the DICOM data collected for the visit
+    {visit_id} during the imaging study: {study_id}. Browse through details
+    of this particular study visit in the 'DICOM' tab below."""
+    meta_item = new_dataset_meta_item(
+        ds_id=str(uuid4()),
+        ds_version='latest',
+        ds_name=visit_id,
+        ds_description=desc)
+    # Load tarball metadata
+    tar_metadata = read_json_file(metapath_dataset)
+    expected_keys = ('size', 'md5', 'path', 'url')
+    if not all(k in tar_metadata for k in expected_keys):
+        raise ValueError(f'incomplete tarball metadata at {metapath_dataset}')
+    # add dataset url
+    meta_item.update(dict(url=tar_metadata['url']))
+    # Load dicom metadata and derive some summary measures
+    dicoms = read_json_file(metapath_file)
+    nr_files = len(dicoms)
+    unique_tag_vals = {}
+    for k in dicom_metadata_keys:
+        unique_tag_vals[k] = list(set(d[k] for d in dicoms))
+    additional_keyvals = {
+        "additional_display": [
+            {
+            "name": "DICOM",
+            "icon": "far fa-file-image",
+            "content": unique_tag_vals
+            }
+        ],
+        "top_display": [
+            {
+                "name": "TAR file size",
+                "value": format_bytes(tar_metadata['size'])
+            },
+            {
+                "name": "Nr of DICOMs",
+                "value": nr_files
+            },
+        ]
+    }
+    # add summary measures to visit entry
+    meta_item.update(additional_keyvals)
+    # TODO: select and add keywords
+    return meta_item
+
+
+def add_to_catalog(meta_entry: dict, catalog_dir: str ):
+    """"""
+    with tempfile.NamedTemporaryFile(mode="w+t") as f:
+        json.dump(meta_entry, f)
+        f.seek(0)
+        res = catalog_api("add", catalog_dir=catalog_dir, metadata=f.name)
+
+
+def read_json_file(file_path):
+    """
+    Load content from catalog metadata file for current node
+    """
+    try:
+        with open(file_path) as f:
+            return json.load(f)
+    except OSError as err:
+        raise("OS error: {0}".format(err))
+    except:
+        raise("Unexpected error:", sys.exc_info()[0])
+
+
+def get_gitconfig(conf_name):
+    result = (
+        subprocess.run(['git', 'config', conf_name], capture_output=True)
+        .stdout.decode()
+        .rstrip()
+    )
+    return result
+
+
+def get_metadata_source():
+    """Create metadata_sources dict required by catalog schema"""
+    source = {
+        'key_source_map': {},
+        'sources': [
+            {
+                'source_name': 'automated_addition',
+                'source_version': '0.1.0',
+                'source_time': datetime.now().timestamp(),
+                'agent_email': get_gitconfig('user.name'),
+                'agent_name': get_gitconfig('user.email'),
+            }
+        ],
+    }
+    return source
+
+
+def new_dataset_meta_item(ds_id, ds_version, ds_name = '', ds_description = ''):
+    """Create a minimal valid dataset metadata blob in catalog schema"""
+    meta_item = {
+        'type': 'dataset',
+        'dataset_id': ds_id,
+        'dataset_version': ds_version,
+        'name': ds_name,
+        'description': ds_description,
+        'metadata_sources': get_metadata_source(),
+    }
+    return meta_item
+
+
+def format_bytes(bytes, decimals=2):
+    if bytes == 0:
+        return "0 Bytes"
+    k = 1024
+    dm = 0 if decimals < 0 else decimals
+    sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
+    i = int(math.floor(math.log(bytes) / math.log(k)))
+    return f"{round(bytes / math.pow(k, i), dm)} {sizes[i]}"
+
+
+
+if __name__ == '__main__':
+    import argparse
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument(
+        "-o", "--store-dir", metavar='PATH', default=os.getcwd(),
+        help="Root directory of the ICF data store. "
+        "Visit data will be read from it, and the DataLad dataset will be "
+        "deposited into it."
+    )
+    p.add_argument(
+        '--id', nargs=2, metavar=('STUDY-ID', 'VISIT-ID'), required=True,
+        help="The study and visit identifiers, used to "
+        "locate the visit archive in the storage organization. "
+    )
+    args = p.parse_args()
+    main(store_dir=args.store_dir,
+         study_id=args.id[0],
+         visit_id=args.id[1],
+    )
