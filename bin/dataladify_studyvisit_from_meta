@@ -2,17 +2,13 @@
 """
 
 """
+import json
 import os
 from pathlib import Path
 import sys
 import tempfile
 
-import json
-# this implementation works with pydicom 2x
-from pydicom import dcmread
-
 import datalad.api as dl
-from datalad.utils import md5sum
 
 # this points to the top of the ICF data store.
 # internally it will be amended with the missing components
