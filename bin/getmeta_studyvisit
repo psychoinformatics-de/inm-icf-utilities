@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+"""
+
+"""
+import os
+from pathlib import Path
+import tempfile
+
+import json
+# this implementation works with pydicom 2x
+from pydicom import dcmread
+
+import datalad.api as dl
+from datalad.utils import md5sum
+
+# this points to the top of the ICF data store.
+# internally it will be amended with the missing components
+# for study and visit deposit locations
+icfstore_baseurl = 'https://data.inm-icf.de'
+
+# which DICOM tags to extract from DICOM files and store as
+# git-annex metadata (e.g., to enable metadata-driven views
+# of visit datasets)
+dicom_metadata_keys = [
+    "SeriesDescription",
+    "SeriesNumber",
+    "Modality",
+    "MRAcquisitionType",
+    "ProtocolName",
+    "PulseSequenceName",
+]
+
+
+def main(store_dir: str,
+         study_id: str,
+         visit_id: str):
+    store_base_dir = Path(store_dir)
+    # where to create metadata
+    dataset_metadata_path = store_base_dir / study_id / \
+        f'{visit_id}_metadata_tarball.json'
+    file_metadata_path = store_base_dir / study_id / \
+        f'{visit_id}_metadata_dicoms.json'
+    # do not overwrite existing metadata
+    for fp in [dataset_metadata_path, file_metadata_path]:
+        deposit_conflicts = [str(p) for p in fp.parent.glob(
+            dataset_metadata_path.name)]
+        if deposit_conflicts:
+            # be safe
+            raise ValueError(
+                f'existing metadata deposit {deposit_conflicts}, '
+                'refusing to overwrite')
+    # locate input tarball
+    tar_path = store_base_dir / study_id / f'{visit_id}_dicom.tar'
+    if not tar_path.exists():
+        raise ValueError(f'no tarball at {tar_path}')
+
+    with tempfile.TemporaryDirectory(prefix='getmeta_visit_') as wdir:
+        runshit(
+            # workdir
+            wdir,
+            # source visit tarball
+            tar_path.resolve(),
+            # source visit tarball URL
+            f'{icfstore_baseurl}/{study_id}/{tar_path.name}',
+            # path to deposit dataset metadata
+            dataset_metadata_path.absolute(),
+            # path to deposit file metadata
+            file_metadata_path.absolute(),
+        )
+
+
+def runshit(wdir, tarpath, tarurl, metapath_dataset, metapath_file):
+    # construct and dump dataset metadata
+    tar_meta = {
+        'size': tarpath.stat().st_size,
+        'md5': md5sum(tarpath),
+        'path': str(Path('icf', tarpath.name)),
+        'url': tarurl,
+    }
+    with open(metapath_dataset, "w") as f:
+            json.dump(tar_meta, f)
+    # construct and dump dicom file metadata
+    dicoms = []
+    for r in dl.ls_file_collection(
+            'tarfile',
+            tarpath,
+            hash=['md5'],
+            result_renderer='disabled',
+            return_type='generator'):
+        fp = r.get('fp')
+        if fp is None:
+            # not a file
+            continue
+        d = dict(path=str(r['item']), md5=r['hash-md5'], size=r['size'])
+        # rewind file pointer to ready for dcmread()
+        fp.seek(0)
+        with dcmread(
+                fp,
+                stop_before_pixels=True,
+                specific_tags=dicom_metadata_keys,
+        ) as dcm:
+            # extract target DICOM tags for metadata
+            d.update({
+                dmk: getattr(dcm, dmk, '')
+                for dmk in dicom_metadata_keys
+            })
+        dicoms.append(d)
+    
+    with open(metapath_file, "w") as f:
+            json.dump(dicoms, f)
+
+    
+
+
+if __name__ == '__main__':
+    import argparse
+    p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument(
+        "-o", "--store-dir", metavar='PATH', default=os.getcwd(),
+        help="Root directory of the ICF data store. "
+        "Visit data will be read from it, and extracted metadata will be "
+        "deposited into it."
+    )
+    p.add_argument(
+        '--id', nargs=2, metavar=('STUDY-ID', 'VISIT-ID'), required=True,
+        help="The study and visit identifiers, used to "
+        "locate the visit archive in the storage organization. "
+    )
+    args = p.parse_args()
+    main(store_dir=args.store_dir,
+         study_id=args.id[0],
+         visit_id=args.id[1],
+    )
