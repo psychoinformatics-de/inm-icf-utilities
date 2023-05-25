@@ -24,6 +24,14 @@ of credentials. You can use the `datalad credentials`_ command from
 DataLad Next to manage (e.g. query, set or remove) credentials known
 to DataLad.
 
+.. note::
+
+   DataLad is a client-side software. Usage of DataLad with ICF store
+   is technically equivalent to downloading tar archives with ``wget``
+   or with a web browser click-to-download: in either case, data
+   access happens over https, and the authorisation is performed by
+   the ICF server, not by the clients.
+
 .. _datalad credentials: http://docs.datalad.org/projects/next/en/latest/generated/man/datalad-credentials.html
 
 
