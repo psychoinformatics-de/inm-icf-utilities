@@ -44,3 +44,7 @@ The pattern for the URL is::
   
 .. note:: A convenience short cut can be provided via configuration
    item ``datalad.clone.url-substitute...``
+
+Cloning will retrieve a lightweight dataset, which does not (yet)
+contain file content. File content can be retrieved with `datalad
+get`. DataLad will handle download and unpacking of the tar file.
