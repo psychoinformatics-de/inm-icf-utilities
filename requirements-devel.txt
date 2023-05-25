@@ -1,4 +1,4 @@
-datalad-next==1.0.0b2
+datalad-next @ git+https://github.com/datalad/datalad-next.git@main
 pytest
 pytest-env
-datalad-catalog==0.2.1b0
+datalad-catalog==0.2.1b0 --pre
