@@ -31,7 +31,7 @@ def test_study_names():
 def data_webserver(dataaccess_credential):
     """Yields a URL to a webserver providing data access"""
     if os.environ.get('APPVEYOR', None) == 'true':
-        yield 'http://localhost/~appveyor'
+        yield 'http://data.inm-icf.de/~appveyor'
     else:
         study_dir = os.environ.get(local_eny_key, None)
         if not study_dir:
