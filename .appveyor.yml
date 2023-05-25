@@ -35,6 +35,11 @@ environment:
   STUDIES_DIR: /data/archive
   STUDIES: "study_1 study_2"
 
+skip_commits:
+  files:
+    - docs/
+    - README.md
+    - .readthedocs.yaml
 
 # In `install` we prep the test system with any non-DataLad tooling
 install:
