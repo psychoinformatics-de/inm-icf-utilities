@@ -7,3 +7,4 @@ User guide
 
    browser
    datalad
+   datalad-advanced
