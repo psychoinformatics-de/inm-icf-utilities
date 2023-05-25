@@ -53,23 +53,20 @@ def main(store_dir: str,
     tar_path = store_base_dir / study_id / f'{visit_id}_dicom.tar'
     if not tar_path.exists():
         raise ValueError(f'no tarball at {tar_path}')
-
-    with tempfile.TemporaryDirectory(prefix='getmeta_visit_') as wdir:
-        runshit(
-            # workdir
-            wdir,
-            # source visit tarball
-            tar_path.resolve(),
-            # source visit tarball URL
-            f'{icfstore_baseurl}/{study_id}/{tar_path.name}',
-            # path to deposit dataset metadata
-            dataset_metadata_path.absolute(),
-            # path to deposit file metadata
-            file_metadata_path.absolute(),
-        )
+    
+    runshit(
+        # source visit tarball
+        tar_path.resolve(),
+        # source visit tarball URL
+        f'{icfstore_baseurl}/{study_id}/{tar_path.name}',
+        # path to deposit dataset metadata
+        dataset_metadata_path.absolute(),
+        # path to deposit file metadata
+        file_metadata_path.absolute(),
+    )        
 
 
-def runshit(wdir, tarpath, tarurl, metapath_dataset, metapath_file):
+def runshit(tarpath, tarurl, metapath_dataset, metapath_file):
     # construct and dump dataset metadata
     tar_meta = {
         'size': tarpath.stat().st_size,
@@ -78,7 +75,7 @@ def runshit(wdir, tarpath, tarurl, metapath_dataset, metapath_file):
         'url': tarurl,
     }
     with open(metapath_dataset, "w") as f:
-            json.dump(tar_meta, f)
+        json.dump(tar_meta, f)
     # construct and dump dicom file metadata
     dicoms = []
     for r in dl.ls_file_collection(
@@ -105,9 +102,8 @@ def runshit(wdir, tarpath, tarurl, metapath_dataset, metapath_file):
                 for dmk in dicom_metadata_keys
             })
         dicoms.append(d)
-    
     with open(metapath_file, "w") as f:
-            json.dump(dicoms, f)
+        json.dump(dicoms, f)
 
     
 
