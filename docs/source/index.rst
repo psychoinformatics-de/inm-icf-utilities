@@ -10,7 +10,9 @@ Welcome to INM ICF utilities's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   user
+   personnel
+   developer
 
 Indices and tables
 ==================
