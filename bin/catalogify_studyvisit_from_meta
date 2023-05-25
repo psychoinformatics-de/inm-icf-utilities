@@ -141,19 +141,24 @@ def generate_visit_entry(study_id, visit_id, metapath_dataset, metapath_file):
     if not all(k in tar_metadata for k in expected_keys):
         raise ValueError(f'incomplete tarball metadata at {metapath_dataset}')
     # add dataset url
-    meta_item.update(dict(url=tar_metadata['url']))
+
+    access_url_pre = 'datalad-annex::?type=external&externaltype=uncurl&url='
+    access_url_post = '_{{annex_key}}&encryption=none'
+    access_url = f'{access_url_pre}{icfstore_baseurl}/{study_id}/{visit_id}{access_url_post}'
+    meta_item.update(dict(url=access_url))
     # Load dicom metadata and derive some summary measures
     dicoms = read_json_file(metapath_file)
     nr_files = len(dicoms)
     unique_tag_vals = {}
     for k in dicom_metadata_keys:
-        unique_tag_vals[k] = list(set(d[k] for d in dicoms))
+        unique_tag_vals[k] = list(filter(None, list(set(d[k] for d in dicoms))))
     additional_keyvals = {
+        "keywords": unique_tag_vals['ProtocolName'] + unique_tag_vals['Modality'],
         "additional_display": [
             {
-            "name": "DICOM",
-            "icon": "far fa-file-image",
-            "content": unique_tag_vals
+                "name": "DICOM",
+                "icon": "far fa-file-image",
+                "content": unique_tag_vals
             }
         ],
         "top_display": [
@@ -169,7 +174,6 @@ def generate_visit_entry(study_id, visit_id, metapath_dataset, metapath_file):
     }
     # add summary measures to visit entry
     meta_item.update(additional_keyvals)
-    # TODO: select and add keywords
     return meta_item
 
 
