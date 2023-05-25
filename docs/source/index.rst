@@ -15,7 +15,7 @@ individuals.
    :maxdepth: 2
    :caption: Contents:
 
-   user
+   user/index
    personnel
    developer
 
