@@ -1,0 +1,51 @@
+{
+    "catalog_name": "ICF Study Catalog",
+    "logo_path": "fzj_icf_logo.svg",
+    "link_color": "#007eb1",
+    "link_hover_color": "#023d6b",
+    "social_links": {
+        "about": "https://www.fz-juelich.de/en/infrastructure/imaging-core-facility-icf",
+        "documentation": null,
+        "github": null,
+        "twitter": null
+    },
+    "dataset_options": {
+        "include_metadata_export": true
+    },
+    "property_sources": {
+        "dataset": {
+            "name": {
+                "rule": "priority",
+                "source": [
+                    "automated_addition"
+                ]
+            },
+            "url": {
+                "rule": "priority",
+                "source": [
+                    "automated_addition"
+                ]
+            },
+            "description": {
+                "rule": "priority",
+                "source": [
+                    "automated_addition"
+                ]
+            },
+            "keywords": {
+                "rule": "merge",
+                "source": "any"
+            },
+            "additional_display": {
+                "rule": "merge",
+                "source": "any"
+            },
+            "top_display": {
+                "rule": "merge",
+                "source": "any"
+            }
+        },
+        "file": {
+        }
+    }   
+}
