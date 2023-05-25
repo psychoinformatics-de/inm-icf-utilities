@@ -36,6 +36,10 @@
                 "rule": "merge",
                 "source": "any"
             },
+            "subdatasets": {
+                "rule": "merge",
+                "source": "any"
+            },
             "additional_display": {
                 "rule": "merge",
                 "source": "any"
