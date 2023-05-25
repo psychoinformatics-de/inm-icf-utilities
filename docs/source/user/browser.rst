@@ -1,2 +1,14 @@
 Browser-based access
 --------------------
+
+Study directory listing can be viewed in a web browser, by navigating
+to an address composed of: ``<store base URL>/<study identifier>``.
+Users will be prompted for credentials. The listing will contain the
+following:
+
+* DICOM files in tar archives, one per visit, ``<visit ID>_dicom.tar``
+* Checksums of the tar archives, allowing verification of data
+  integrity, ``<visit ID>_dicom.tar.md5sum``
+* (optional) a ``catalog`` directory containing a catalog of the study
+  visits (which can be used to view e.g. available modalities and
+  DICOM series for each visit)
