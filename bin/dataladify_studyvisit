@@ -2,15 +2,20 @@
 """
 
 """
+import logging
 import os
 from pathlib import Path
 import tempfile
 
 # this implementation works with pydicom 2x
 from pydicom import dcmread
+from pydicom.errors import InvalidDicomError
 
 import datalad.api as dl
 from datalad.utils import md5sum
+
+
+lgr = logging.getLogger('inm-icf-utilities')
 
 # this points to the top of the ICF data store.
 # internally it will be amended with the missing components
@@ -135,18 +140,20 @@ def runshit(wdir, tarpath, tarurl, repobasepath):
         d = dict(path=str(r['item']), md5=r['hash-md5'], size=r['size'])
         # rewind file pointer to ready for dcmread()
         fp.seek(0)
-        with dcmread(
-                fp,
-                stop_before_pixels=True,
-                specific_tags=dicom_metadata_keys,
-        ) as dcm:
-            # extract target DICOM tags for metadata
-            d.update({
-                dmk: getattr(dcm, dmk, '')
-                for dmk in dicom_metadata_keys
-            })
-        dicoms.append(d)
-
+        try:
+            with dcmread(
+                    fp,
+                    stop_before_pixels=True,
+                    specific_tags=dicom_metadata_keys,
+            ) as dcm:
+                # extract target DICOM tags for metadata
+                d.update({
+                    dmk: getattr(dcm, dmk, '')
+                    for dmk in dicom_metadata_keys
+                })
+            dicoms.append(d)
+        except InvalidDicomError:
+            lgr.info('skipping non-DICOM file: %s', r['item'])
     dicom_recs = ds.addurls(
         dicoms,
         f'dl+archive:{tarkey}#path={{path}}&size={{size}}',
