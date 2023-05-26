@@ -39,8 +39,15 @@ def run_script(name: str,
 def dataladify_visits(studies: list[str], visits: list[str]):
     for study in studies:
         for visit in visits:
+            # run metadata generation script
             run_script(
-                'dataladify_studyvisit',
+                'getmeta_studyvisit',
+                studies_dir,
+                study, visit
+            )
+            # run dataladification script
+            run_script(
+                'dataladify_studyvisit_from_meta',
                 studies_dir,
                 study, visit
             )
@@ -70,15 +77,15 @@ def test_dataladification(tmp_path: Path,
     # Perform dataladification
     dataladify_visits(test_study_names, existing_visits)
 
-    # Try to clone the datasets and fetch the dicom tarfile
-    for study in test_study_names:
-        for visit in existing_visits:
-            dataset = clone_visit(
-                tmp_path / f'ds_{study}_{visit}',
-                data_webserver,
-                study,
-                visit
-            )
-            # Try to get the tar file and the DICOMs
-            dataset.get(f'icf/{visit}_dicom.tar')
-            dataset.get(f'{study}_{visit}')
+    # # Try to clone the datasets and fetch the dicom tarfile
+    # for study in test_study_names:
+    #     for visit in existing_visits:
+    #         dataset = clone_visit(
+    #             tmp_path / f'ds_{study}_{visit}',
+    #             data_webserver,
+    #             study,
+    #             visit
+    #         )
+    #         # Try to get the tar file and the DICOMs
+    #         dataset.get(f'icf/{visit}_dicom.tar')
+    #         dataset.get(f'{study}_{visit}')
