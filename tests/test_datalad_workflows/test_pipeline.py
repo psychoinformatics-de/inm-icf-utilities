@@ -36,7 +36,7 @@ def run_script(name: str,
     )
 
 
-def dataladify_visits(studies: list[str], visits: list[str]):
+def process_visits(studies: list[str], visits: list[str]):
     for study in studies:
         for visit in visits:
             # run metadata generation script
@@ -51,6 +51,14 @@ def dataladify_visits(studies: list[str], visits: list[str]):
                 studies_dir,
                 study, visit
             )
+            # run catalogification script
+            run_script(
+                'catalogify_studyvisit_from_meta',
+                studies_dir,
+                study, visit
+            )
+
+
 
 
 def clone_visit(path: Path, url: str, study: str, visit: str) -> Dataset:
@@ -62,7 +70,7 @@ def clone_visit(path: Path, url: str, study: str, visit: str) -> Dataset:
     )
 
 
-def test_dataladification(tmp_path: Path,
+def test_pipeline(tmp_path: Path,
                           test_study_names,
                           data_webserver,
                           dataaccess_credential,
@@ -74,9 +82,13 @@ def test_dataladification(tmp_path: Path,
         'realm': 'http://data.inm-icf.de/Restricted'
     })
 
-    # Perform dataladification
-    dataladify_visits(test_study_names, existing_visits)
+    # Perform metadata generation, dataladification, and catalogification
+    process_visits(test_study_names, existing_visits)
 
+    # 1. Test metadata
+    # TODO
+
+    # 2. Test datasets
     # # Try to clone the datasets and fetch the dicom tarfile
     # for study in test_study_names:
     #     for visit in existing_visits:
@@ -89,3 +101,6 @@ def test_dataladification(tmp_path: Path,
     #         # Try to get the tar file and the DICOMs
     #         dataset.get(f'icf/{visit}_dicom.tar')
     #         dataset.get(f'{study}_{visit}')
+
+    # 3. Test catalog
+    # TODO
