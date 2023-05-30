@@ -55,27 +55,28 @@ def get_clone_annex_url(source_url: str,
     if source_url.endswith('/'):
         source_url = source_url[:-1]
 
-    restricted_realm = get_restricted_realm(f'{source_url}/{study}')
+    auth_realm = get_restricted_realm(f'{source_url}/{study}')
 
     return (
         'datalad-annex::?type=external&externaltype=uncurl'
         f'&url={source_url}/{study}/{visit}_{{{{annex_key}}}}'
         '&encryption=none',
-        f'{source_url}/{restricted_realm}',
+        f'{source_url}/{auth_realm}',
     )
 
 
-def add_credentials(urls: Iterable[str],
+def add_credentials(realms: Iterable[str],
                     credentials: dict,
                     credman: CredentialManager,
                     ):
 
     # Add credentials for all URLs to credential manager
-    for index, url in enumerate(urls):
+    for index, realm in enumerate(realms):
+        print(f'AAAAAAAAAAAA: adding credential for realm: {realm}')
         kwargs = {
             **credentials,
             'name': f'icf-test-credentials-{index}',
-            'realm': url
+            'realm': realm
         }
         result = credman.set(**kwargs)
         assert result is not None
@@ -90,8 +91,8 @@ def clone_visit(path: Path,
                 ) -> Dataset:
 
     # Get involved URLs and set credentials for `auth_url`
-    clone_url, auth_url = get_clone_annex_url(source_url, study, visit)
-    add_credentials([auth_url], credentials, credman)
+    clone_url, auth_realm = get_clone_annex_url(source_url, study, visit)
+    add_credentials([auth_realm], credentials, credman)
 
     # Clone a visit from the clone URL
     return clone(source=clone_url, path=path)
