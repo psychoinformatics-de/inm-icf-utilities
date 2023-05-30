@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import requests
+import www_authenticate
 
 
 def get_restricted_realm(url: str) -> str | None:
@@ -10,15 +11,12 @@ def get_restricted_realm(url: str) -> str | None:
     header, and if the authentication method is 'basic'
     """
 
-    auth_header_name = 'www-authenticate'
-
     r = requests.get(url)
-    if auth_header_name not in r.headers:
-        return None
 
-    words = r.headers[auth_header_name].split()
-    if words[0].lower() != 'basic':
-        return None
-
-    if words[1].startswith('realm="'):
-        return words[1][7:-1]
+    auth_header_name = 'WWW-Authenticate'
+    auth_header = r.headers.get(auth_header_name, None)
+    if auth_header:
+        parsed = www_authenticate.parse(auth_header)
+        if 'Basic' in parsed:
+            return parsed['Basic']['realm']
+    return None
