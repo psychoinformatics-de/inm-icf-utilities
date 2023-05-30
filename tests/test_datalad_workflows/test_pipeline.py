@@ -154,21 +154,21 @@ def test_pipeline(tmp_path: Path,
                 with open(metadata_path) as f:
                     json.load(f)
 
-    # # 2. Test dataset generation
-    # # - Try to clone the datasets and fetch the dicom tarfile
-    # for study in test_study_names:
-    #     for visit in existing_visits:
-    #         dataset = clone_visit(
-    #             tmp_path / f'ds_{study}_{visit}',
-    #             data_webserver,
-    #             study,
-    #             visit,
-    #             dataaccess_credential,
-    #             credman,
-    #         )
-    #         # Try to get the tar file and the DICOMs
-    #         dataset.get(f'icf/{visit}_dicom.tar')
-    #         dataset.get(f'{study}_{visit}')
+    # 2. Test dataset generation
+    # - Try to clone the datasets and fetch the dicom tarfile
+    for study in test_study_names:
+        for visit in existing_visits:
+            dataset = clone_visit(
+                tmp_path / f'ds_{study}_{visit}',
+                data_webserver,
+                study,
+                visit,
+                dataaccess_credential,
+                credman,
+            )
+            # Try to get the tar file and the DICOMs
+            dataset.get(f'icf/{visit}_dicom.tar')
+            dataset.get(f'{study}_{visit}')
     
     # 3. Test catalog generation
     # - assert that study catalogs have been created using webcatalog method
