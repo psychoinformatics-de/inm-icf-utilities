@@ -107,25 +107,21 @@ def runshit(wdir, metapath_dataset, metapath_file, repobasepath):
     # assure tar key availability
     repo.call_annex(['setpresentkey', tarkey, uncurl_uuid, '1'])
 
-    # here we register the datalad-archives special remote, to claim
+    # here we register the archivist special remote, to claim
     # the dl+archives URLs registered below.
-    # this really should be the archivist remote, but it is not yet implemented.
-    # this will box ourselves into a corner, and force us to replace the
-    # implementation of datalad-archives with the archivist code, rather than
-    # have them coexist -- otherwise we would need to fix all datasets
     repo.call_annex([
         'initremote',
-        'datalad-archives',
+        'archivist',
         'type=external',
-        'externaltype=datalad-archives',
+        'externaltype=archivist',
         'encryption=none',
         # auto-enabling is cheap (makes no connection attempts), and convenient
         'autoenable=true',
     ])
-    dlarchives_uuid = repo.call_annex_records(
-        ['info', 'datalad-archives'])[0]['uuid']
-    assert dlarchives_uuid
-    
+    archivist_uuid = repo.call_annex_records(
+        ['info', 'archivist'])[0]['uuid']
+    assert archivist_uuid
+
     # load dicom metadata
     dicoms = read_json_file(metapath_file)
     # add to dataset
@@ -147,7 +143,7 @@ def runshit(wdir, metapath_dataset, metapath_file, repobasepath):
         for r in dicom_recs if r.get('action') == 'fromkey'
     ]
     for dicomkey in dicomkeys:
-        repo.call_annex(['setpresentkey', dicomkey, dlarchives_uuid, '1'])
+        repo.call_annex(['setpresentkey', dicomkey, archivist_uuid, '1'])
 
     repo.call_git([
         'remote', 'add', 'icfstore',
@@ -173,6 +169,7 @@ def runshit(wdir, metapath_dataset, metapath_file, repobasepath):
         data='nothing',
     )
 
+
 def read_json_file(file_path):
     """
     Load content from catalog metadata file for current node
@@ -184,7 +181,7 @@ def read_json_file(file_path):
         raise("OS error: {0}".format(err))
     except:
         raise("Unexpected error:", sys.exc_info()[0])
-        
+
 
 if __name__ == '__main__':
     import argparse
