@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -e -u
+
+sudo cp .appveyor/data/ssl-cert-snakeoil.crt /etc/ssl/certs
+sudo cp .appveyor/data/ssl-cert-snakeoil.key /etc/ssl/private
+
+a2enmod ssl
+systemctl restart apache2
+
+sudo a2ensite default-ssl
+systemctl reload apache2

@@ -54,6 +54,8 @@ install:
   - curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
   # Bootstrap ICF-like system installation
   - sudo .appveyor/install_apt_pkgs
+  - .appveyor/apache_enable_ssl
+  - .appveyor/apache_enable_user_dir
   # build the singularity image, unless we got it from the cache
   - sh: "[ ! -f icf.sif ] && singularity build --fakeroot icf.sif singularity/icf.def || true"
   # install image as `icf-utils` (mounting the ICF /data store on-run)
