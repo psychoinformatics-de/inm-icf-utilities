@@ -143,7 +143,7 @@ def test_pipeline(tmp_path: Path,
     )
 
     # 1. Test metadata generation
-    # - assert generated metadata files exist and dump their content
+    # - assert generated metadata files exist and load their content
     metadata_types = ['tarball', 'dicoms']
     for study in test_study_names:
         for visit in existing_visits:
@@ -152,7 +152,7 @@ def test_pipeline(tmp_path: Path,
                     study / f'{visit}_metadata_{m}.json'
                 assert metadata_path.exists()
                 with open(metadata_path) as f:
-                    print(json.load(f))
+                    json.load(f)
 
     # # 2. Test dataset generation
     # # - Try to clone the datasets and fetch the dicom tarfile
