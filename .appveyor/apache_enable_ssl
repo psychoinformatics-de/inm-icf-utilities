@@ -4,9 +4,14 @@ set -e -u
 
 sudo cp .appveyor/data/ssl-cert-snakeoil.crt /etc/ssl/certs/ssl-cert-snakeoil.pem
 sudo cp .appveyor/data/ssl-cert-snakeoil.key /etc/ssl/private/ssl-cert-snakeoil.key
+sudo cp .appveyor/data/ssl-cert-snakeoil.crt /usr/share/ca-certificates
+
+sudo /usr/sbin/dpk-reconfigure ca-certificates
 
 sudo a2enmod ssl
 sudo systemctl restart apache2
 
 sudo a2ensite default-ssl
 sudo systemctl reload apache2
+
+echo "ServerName data.inm-icf.de" | sudo tee -a /etc/apache2/httpd.conf
