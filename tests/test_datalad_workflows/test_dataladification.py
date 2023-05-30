@@ -4,6 +4,11 @@ import logging
 import os
 from pathlib import Path
 from typing import Iterable
+from urllib.parse import (
+    urlparse,
+    urlunparse,
+    ParseResult,
+)
 
 from datalad.api import clone
 from datalad.distribution.dataset import Dataset
@@ -56,13 +61,22 @@ def get_clone_annex_url(source_url: str,
     if source_url.endswith('/'):
         source_url = source_url[:-1]
 
-    auth_realm = get_restricted_realm(f'{source_url}/{study}')
+    access_url = f'{source_url}/{study}'
+    auth_realm = get_restricted_realm(access_url)
+
+    parsed_url = urlparse(access_url)
+
+    copy_attributes = ['scheme', 'netloc', 'path', 'params', 'query', 'fragment']
+    realm_parsed_url = ParseResult(**{
+        name: getattr(parsed_url, name) if name != 'path' else auth_realm
+        for name in copy_attributes
+    })
 
     return (
         'datalad-annex::?type=external&externaltype=uncurl'
         f'&url={source_url}/{study}/{visit}_{{{{annex_key}}}}'
         '&encryption=none',
-        f'{source_url}/{auth_realm}',
+        urlunparse(realm_parsed_url),
     )
 
 
@@ -73,7 +87,6 @@ def add_credentials(realms: Iterable[str],
 
     # Add credentials for all URLs to credential manager
     for index, realm in enumerate(realms):
-        print(f'AAAAAAAAAAAA: adding credential for realm: {realm}')
         kwargs = {
             **credentials,
             'name': f'icf-test-credentials-{index}',
@@ -106,9 +119,6 @@ def test_dataladification(tmp_path: Path,
                           dataaccess_credential: dict,
                           credman: CredentialManager,
                           ):
-
-    dt_lgr = logging.getLogger('datalad')
-    dt_lgr.setLevel(5)
 
     # Perform dataladification
     dataladify_visits(
