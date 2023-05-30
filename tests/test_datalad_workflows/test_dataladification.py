@@ -10,6 +10,8 @@ from datalad.runner.runner import WitlessRunner
 from datalad.tests.utils_pytest import on_appveyor
 from datalad_next.credman import CredentialManager
 
+from .utils import get_restricted_realm
+
 
 existing_visits = ['visit_a', 'visit_b']
 
@@ -53,11 +55,13 @@ def get_clone_annex_url(source_url: str,
     if source_url.endswith('/'):
         source_url = source_url[:-1]
 
+    restricted_realm = get_restricted_realm(f'{source_url}/{study}')
+
     return (
         'datalad-annex::?type=external&externaltype=uncurl'
         f'&url={source_url}/{study}/{visit}_{{{{annex_key}}}}'
         '&encryption=none',
-        f'{source_url}/Protected',
+        f'{source_url}/{restricted_realm}',
     )
 
 
