@@ -20,7 +20,10 @@ from datalad_next.tests.fixtures import (
     existing_noannex_dataset,
 )
 
+# local fixtures setup
 from .fixtures import (
-    data_webserver,
     dataaccess_credential,
+    data_webserver,
+    test_studies_dir,
+    test_study_names,
 )

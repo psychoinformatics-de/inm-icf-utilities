@@ -12,6 +12,8 @@
 # This version of Ubuntu is based on debian bullseye
 image: Ubuntu2004
 
+hosts:
+  data.inm-icf.de: 127.0.0.2
 
 environment:
   # Set this to `post-install` to activate the ssh login after the
@@ -79,13 +81,16 @@ install:
         test.user secret_1
         $STUDIES
 
-  # Run the non-DataLad DICOM data ingestion script
+  # Run the non-DataLad DICOM data ingestion script. Create two visits, i.e.
+  # ``visit_a´´ and ``visit_b´´, for each study defined in ${STUDIES}
   - sh:
       for s in $STUDIES; do
-        sudo bin/make_studyvisit_archive
-          --output-dir "$STUDIES_DIR"
-          --id $s visit_1
-          "$FROM_SCANNER";
+        for v in visit_a visit_b; do
+          sudo bin/make_studyvisit_archive
+            --output-dir "$STUDIES_DIR"
+            --id $s $v
+            "$FROM_SCANNER";
+        done
       done
 
   # Enable external SSH access to CI worker on all other systems. This uses the

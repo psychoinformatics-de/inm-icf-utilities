@@ -3,9 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from datalad.api import (
-    download,
-)
+from datalad.api import download
 from datalad_next.exceptions import IncompleteResultsError
 from datalad_next.tests.utils import assert_status
 
@@ -13,7 +11,7 @@ from datalad_next.tests.utils import assert_status
 def test_example_unauthorized(data_webserver):
     with pytest.raises(IncompleteResultsError):
         download(
-            f'{data_webserver}/study_1/visit_1_dicom.tar',
+            f'{data_webserver}/study_1/visit_a_dicom.tar',
             result_renderer='disabled')
 
 
@@ -23,10 +21,10 @@ def test_example_authorized(
 ):
     credman.set(**dataaccess_credential)
 
-    target_file = tmp_path / 'visit_1_dicom.tar'
+    target_file = tmp_path / 'visit_a_dicom.tar'
 
     results = download(
-        {f'{data_webserver}/study_1/visit_1_dicom.tar': target_file},
+        {f'{data_webserver}/study_1/visit_a_dicom.tar': target_file},
         credential=dataaccess_credential['name'],
         result_renderer='disabled',
         on_failure='ignore',
