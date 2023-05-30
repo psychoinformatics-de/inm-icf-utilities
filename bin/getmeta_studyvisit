@@ -5,7 +5,6 @@
 import logging
 import os
 from pathlib import Path
-import tempfile
 
 import json
 # this implementation works with pydicom 2x
@@ -58,7 +57,7 @@ def main(store_dir: str,
     tar_path = store_base_dir / study_id / f'{visit_id}_dicom.tar'
     if not tar_path.exists():
         raise ValueError(f'no tarball at {tar_path}')
-    
+
     runshit(
         # source visit tarball
         tar_path.resolve(),
@@ -68,7 +67,7 @@ def main(store_dir: str,
         dataset_metadata_path.absolute(),
         # path to deposit file metadata
         file_metadata_path.absolute(),
-    )        
+    )
 
 
 def runshit(tarpath, tarurl, metapath_dataset, metapath_file):
@@ -112,8 +111,6 @@ def runshit(tarpath, tarurl, metapath_dataset, metapath_file):
             lgr.info('skipping non-DICOM file: %s', r['item'])
     with open(metapath_file, "w") as f:
         json.dump(dicoms, f)
-
-    
 
 
 if __name__ == '__main__':
