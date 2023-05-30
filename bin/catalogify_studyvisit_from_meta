@@ -137,7 +137,7 @@ def generate_visit_entry(study_id, visit_id, metapath_dataset, metapath_file):
         ds_description=desc)
     # Load tarball metadata
     tar_metadata = read_json_file(metapath_dataset)
-    expected_keys = ('size', 'md5', 'path', 'url')
+    expected_keys = ('size', 'md5', 'dspath', 'storepath')
     if not all(k in tar_metadata for k in expected_keys):
         raise ValueError(f'incomplete tarball metadata at {metapath_dataset}')
     # add dataset url

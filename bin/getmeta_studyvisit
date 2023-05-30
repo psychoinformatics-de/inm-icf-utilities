@@ -62,8 +62,8 @@ def main(store_dir: str,
     runshit(
         # source visit tarball
         tar_path.resolve(),
-        # source visit tarball URL
-        f'{icfstore_baseurl}/{study_id}/{tar_path.name}',
+        # source visit tarball URL, relative to store
+        f'{study_id}/{tar_path.name}',
         # path to deposit dataset metadata
         dataset_metadata_path.absolute(),
         # path to deposit file metadata
@@ -76,8 +76,8 @@ def runshit(tarpath, tarurl, metapath_dataset, metapath_file):
     tar_meta = {
         'size': tarpath.stat().st_size,
         'md5': md5sum(tarpath),
-        'path': str(Path('icf', tarpath.name)),
-        'url': tarurl,
+        'dspath': str(Path('icf', tarpath.name)),
+        'storepath': tarurl,
     }
     with open(metapath_dataset, "w") as f:
         json.dump(tar_meta, f)
