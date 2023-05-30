@@ -6,11 +6,16 @@
 Welcome to INM ICF utilities's documentation!
 =============================================
 
+The ICF archive provides storage of MRI data acquisitions in DICOM
+format for the purpose of long-term data preservation, with the
+ability to grant read-access to a data subset to authorized
+individuals.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   user
+   user/index
    personnel
    developer
 

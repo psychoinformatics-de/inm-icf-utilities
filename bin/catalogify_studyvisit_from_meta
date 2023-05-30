@@ -42,7 +42,7 @@ def main(store_dir: str,
          visit_id: str):
     store_base_dir = Path(store_dir)
     # where to add the catalog entry
-    study_catalog_path = store_base_dir / study_id / f'{study_id}_catalog'
+    study_catalog_path = store_base_dir / study_id / 'catalog'
     # locate metadata files
     dataset_metadata_path = store_base_dir / study_id / \
         f'{visit_id}_metadata_tarball.json'

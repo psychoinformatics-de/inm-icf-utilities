@@ -12,7 +12,7 @@ temp_htaccess=$(mktemp)
 
 cat > "$temp_htaccess" <<EOF
 AuthType Basic
-AuthName "Restricted study data"
+AuthName "Restricted"
 AuthBasicProvider file
 AuthUserFile "/var/www/passwords"
 Require user test.user

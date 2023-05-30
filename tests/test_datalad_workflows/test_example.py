@@ -3,11 +3,16 @@ from pathlib import Path
 
 import pytest
 
-from datalad.api import (
-    download,
-)
+from datalad.api import download
 from datalad_next.exceptions import IncompleteResultsError
 from datalad_next.tests.utils import assert_status
+
+from ..fixtures import (
+    dataaccess_credential,
+    data_webserver,
+    test_studies_dir,
+    test_study_names,
+)
 
 
 def test_example_unauthorized(data_webserver):
