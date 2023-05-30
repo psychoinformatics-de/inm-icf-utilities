@@ -3,4 +3,5 @@
 set -e -u
 
 sudo a2enmod userdir
-sudo apachectl restart
+sudo systemctl restart apache2
+
