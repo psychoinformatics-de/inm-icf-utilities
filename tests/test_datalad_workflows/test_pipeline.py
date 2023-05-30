@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 import os
 from pathlib import Path
@@ -14,6 +15,7 @@ from datalad.api import clone
 from datalad.distribution.dataset import Dataset
 from datalad.runner.runner import WitlessRunner
 from datalad.tests.utils_pytest import on_appveyor
+from datalad_catalog.webcatalog import WebCatalog
 from datalad_next.credman import CredentialManager
 
 from .utils import get_restricted_realm
@@ -40,14 +42,27 @@ def run_script(name: str,
     )
 
 
-def dataladify_visits(studies_dir: Path,
-                      studies: list[str],
-                      visits: list[str]
-                      ):
+def process_visits(studies_dir: Path,
+                   studies: list[str],
+                   visits: list[str]
+                   ):
     for study in studies:
         for visit in visits:
+            # run metadata generation script
             run_script(
-                'dataladify_studyvisit',
+                'getmeta_studyvisit',
+                studies_dir,
+                study, visit
+            )
+            # run dataladification script
+            run_script(
+                'dataladify_studyvisit_from_meta',
+                studies_dir,
+                study, visit
+            )
+            # run catalogification script
+            run_script(
+                'catalogify_studyvisit_from_meta',
                 studies_dir,
                 study, visit
             )
@@ -112,22 +127,35 @@ def clone_visit(path: Path,
     return clone(source=clone_url, path=path)
 
 
-def test_dataladification(tmp_path: Path,
-                          test_studies_dir: str,
-                          test_study_names: list[str],
-                          data_webserver: str,
-                          dataaccess_credential: dict,
-                          credman: CredentialManager,
-                          ):
+def test_pipeline(tmp_path: Path,
+                  test_studies_dir: str,
+                  test_study_names: list[str],
+                  data_webserver: str,
+                  dataaccess_credential: dict,
+                  credman: CredentialManager,
+                ):
 
-    # Perform dataladification
-    dataladify_visits(
+    # Perform metadata generation, dataladification, and catalogification
+    process_visits(
         Path(test_studies_dir),
         test_study_names,
         existing_visits,
     )
 
-    # Try to clone the datasets and fetch the dicom tarfile
+    # 1. Test metadata generation
+    # - assert generated metadata files exist and load their content
+    metadata_types = ['tarball', 'dicoms']
+    for study in test_study_names:
+        for visit in existing_visits:
+            for m in metadata_types:
+                metadata_path = Path(test_studies_dir) /\
+                    study / f'{visit}_metadata_{m}.json'
+                assert metadata_path.exists()
+                with open(metadata_path) as f:
+                    json.load(f)
+
+    # 2. Test dataset generation
+    # - Try to clone the datasets and fetch the dicom tarfile
     for study in test_study_names:
         for visit in existing_visits:
             dataset = clone_visit(
@@ -141,3 +169,10 @@ def test_dataladification(tmp_path: Path,
             # Try to get the tar file and the DICOMs
             dataset.get(f'icf/{visit}_dicom.tar')
             dataset.get(f'{study}_{visit}')
+    
+    # 3. Test catalog generation
+    # - assert that study catalogs have been created using webcatalog method
+    for study in test_study_names:
+        catalog_path = Path(test_studies_dir) / study / 'catalog'
+        ctlg = WebCatalog(location=str(catalog_path))
+        assert ctlg.is_created()
