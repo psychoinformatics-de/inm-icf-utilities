@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import os
 from pathlib import Path
 from typing import Iterable
@@ -105,6 +106,9 @@ def test_dataladification(tmp_path: Path,
                           dataaccess_credential: dict,
                           credman: CredentialManager,
                           ):
+
+    dt_lgr = logging.getLogger('datalad')
+    dt_lgr.setLevel(5)
 
     # Perform dataladification
     dataladify_visits(
