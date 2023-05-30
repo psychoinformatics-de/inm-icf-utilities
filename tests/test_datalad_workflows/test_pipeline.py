@@ -172,7 +172,14 @@ def test_pipeline(tmp_path: Path,
     
     # 3. Test catalog generation
     # - assert that study catalogs have been created using webcatalog method
-    for study in test_study_names:
+    for i, study in enumerate(test_study_names):
         catalog_path = Path(test_studies_dir) / study / 'catalog'
         ctlg = WebCatalog(location=str(catalog_path))
         assert ctlg.is_created()
+        if i==0:
+            runner = WitlessRunner(cwd=test_studies_dir, env=dict(os.environ))
+            runner.run(
+                (['sudo', '-E', '--preserve-env=PATH'] if on_appveyor else []) + [
+                    f'appveyor PushArtifact {catalog_path.resolve()}'
+                ]
+            )
