@@ -146,3 +146,9 @@ test_script:
         curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
       fi
   - python -m pytest -s -v ../tests
+  - sh:
+      if [ X"$ACTIVATE_SSH_LOGIN" == "Xpost-tests" ]; then
+        curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
+        touch $HOME/build.lock;
+        while [ -e $HOME/build.lock ]; do sleep 5; done;
+      fi;
