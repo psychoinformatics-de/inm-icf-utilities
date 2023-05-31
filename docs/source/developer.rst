@@ -49,7 +49,7 @@ The INM-ICF utilities are distributed as a bundle in the form of a
 Singularity software container. This container is updated regularly
 and can be downloaded from `ci.appveyor.com/api/projects/mih/inm-icf-utilities/artifacts/icf.sif <https://ci.appveyor.com/api/projects/mih/inm-icf-utilities/artifacts/icf.sif>`_.
 When testing changes to the INM-ICF-utilities, the Singularity image needs to be
-rebuild with the changes included.
+rebuilt with the changes included.
 Its recipe can be found under ``singularity/icf.def``.
 The image can be rebuild automatically using the Appveyor-based CI testsuite.
 If only software dependencies change, an update is **not** triggered automatically
