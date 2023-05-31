@@ -50,7 +50,7 @@ def process_visits(studies_dir: Path,
         for visit in visits:
             # run metadata generation script
             run_script(
-                'getmeta_studyvisit',
+                'deposit_visit_metadata',
                 studies_dir,
                 study, visit
             )
