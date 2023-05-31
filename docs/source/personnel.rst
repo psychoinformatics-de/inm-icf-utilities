@@ -1,2 +1,0 @@
-ICF Personnel guide
-===================
