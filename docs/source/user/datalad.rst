@@ -30,7 +30,7 @@ of credentials. You can use the `datalad credentials`_ command from
 DataLad Next to manage (e.g. query, set or remove) credentials known
 to DataLad.
 
-.. note::
+.. admonition:: DataLad usage in the context of GDPR
 
    DataLad is a client-side software. Usage of DataLad with ICF store
    is technically equivalent to downloading tar archives with ``wget``
