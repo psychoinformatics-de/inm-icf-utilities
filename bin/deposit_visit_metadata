@@ -1,6 +1,25 @@
 #!/usr/bin/env python3
 """
+This command locates the DICOM tarball for a particular visit in a study (given
+by their respective identifiers) in the data store, and extracts a minimal set
+of metadata tags for each DICOM image, and the TAR archive as a whole. These
+metadata are then deposited in two files, in JSON format, in the study
+directory:
 
+- `{visit_id}_metadata_tarball.json`
+
+  JSON object with basic properties of the archive, such as 'size', and
+  'md5'.
+
+- `{visit_id}_metadata_dicoms.json`
+
+  JSON array with essential properties for each DICOM image file, such as
+  'path' (relative path inside the TAR archive), 'md5' (MD5 checksum of
+  the DICOM file), 'size' (in bytes), and select standard DICOM tags,
+  such as "SeriesDescription", "SeriesNumber", "Modality",
+  "MRAcquisitionType", "ProtocolName", "PulseSequenceName". The latter
+  enable a rough, technical characterization of the images in the TAR
+  archive.
 """
 import logging
 import os
@@ -110,10 +129,13 @@ def describe_tarball(tarpath, tarurl, metapath_dataset, metapath_file):
 
 if __name__ == '__main__':
     import argparse
-    p = argparse.ArgumentParser(description=__doc__)
+    p = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
     p.add_argument(
         "-o", "--store-dir", metavar='PATH', default=os.getcwd(),
-        help="Root directory of the ICF data store. "
+        help="Root directory of the data store. "
         "Visit data will be read from it, and extracted metadata will be "
         "deposited into it."
     )
