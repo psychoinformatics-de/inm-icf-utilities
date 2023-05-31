@@ -13,6 +13,8 @@ extension installed.
 Credentials
 ^^^^^^^^^^^
 
+The ICF store is not publicly available, and ICF administrators will provide user names and passwords on a per-study basis.
+
 DataLad will store or retrieve your username and password using your
 operating system's keyring service. In general, the first time you use
 DataLad to access a project directory, you will be prompted for your

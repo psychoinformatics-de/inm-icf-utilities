@@ -58,7 +58,7 @@ number:
       └── 4/
       └── 5/
       
-The view can be filtered, e.g. to only show anatomical sequences:
+The view can be filtered, e.g. to only show anatomical (T1 or T2) sequences:
 
 .. code-block:: console
 
