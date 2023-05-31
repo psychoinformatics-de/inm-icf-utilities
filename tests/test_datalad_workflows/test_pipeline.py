@@ -170,8 +170,8 @@ def test_pipeline(tmp_path: Path,
             # TODO swap the order of gets, or actually drop the tar get
             # completely. Pulling individual files will do all that internally
             # Try to get the tar file and the DICOMs
-            dataset.get(f'icf/{visit}_dicom.tar')
-            #dataset.get(f'{study}_{visit}')
+            #dataset.get(f'icf/{visit}_dicom.tar')
+            dataset.get(f'{study}_{visit}')
 
     # 3. Test catalog generation
     # - assert that study catalogs have been created using webcatalog method
