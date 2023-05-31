@@ -17,13 +17,29 @@ available, either through ``singularity run``:
 
 .. code-block:: console
 
-   $ singularity run icf.sif make_studyvisit_archive ...
+   $ singularity run <singularity options> icf.sif <script name> <script options>
 
-or, after making the image file executable:
+or by making the image file executable.
 
-.. code-block:: console
+The singularity image can also be installed as if it was a system
+package. For this, fill in the placeholders in the following script,
+and save it as ``icf-utils``:
 
-   $ ./icf.sif make_studyvisit_archive ...
+.. code-block:: sh
+
+   #!/bin/sh
+   set -e -u
+   singularity run -B <absolute-path-to-data> <absolute-path-to-icf.sif-file> "$@" > icf-utils
+
+The ``-B`` defines a bind path, making it accessible from within the
+container.
+
+Afterwards, install it under ``/usr/bin`` to make all functionality
+available under an ``icf-utils`` command.
+
+.. code-block::
+
+   $ sudo install -t /usr/bin icf-utils
 
 Archive generation
 ^^^^^^^^^^^^^^^^^^
@@ -34,7 +50,7 @@ generated and deposited in the study directory with
 
 .. code-block:: console
 
-   $ ./icf.sif make_studyvisit_archive --help
+   $ icf-utils make_studyvisit_archive --help
    usage: make_studyvisit_archive [-h] [-o PATH] --id STUDY-ID VISIT-ID <input-dir>
 
 DataLad dataset generation
@@ -53,19 +69,19 @@ Required metadata can be prepared with ``getmeta_studyvisit``:
 
 .. code-block:: console
 
-  $ ./icf.sif getmeta_studyvisit -h
+  $ icf-utils getmeta_studyvisit -h
   usage: getmeta_studyvisit [-h] [-o PATH] --id STUDY-ID VISIT-ID
 
 A dataset can be created with ``dataladify_studyvisit_from_meta``:
 
 .. code-block:: console
 
-   $ ./icf.sif dataladify_studyvisit_from_meta -h
+   $ icf-utils dataladify_studyvisit_from_meta -h
    usage: dataladify_studyvisit_from_meta [-h] [-o PATH] --id STUDY-ID VISIT-ID
 
 DataLad catalog can be created or updated with ``catalogify_studyvisit_from_meta``:
 
 .. code-block:: console
 
-  $ ./icf.sif dataladify_studyvisit_from_meta --help
+  $ icf-utils dataladify_studyvisit_from_meta --help
   usage: dataladify_studyvisit_from_meta [-h] [-o PATH] --id STUDY-ID VISIT-ID
