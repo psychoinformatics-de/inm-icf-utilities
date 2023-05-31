@@ -13,7 +13,7 @@ From: debian:bookworm-slim
     # install all non-datalad deps from Debian proper
     apt-get update -qq
     apt-get -y install eatmydata
-    eatmydata apt-get -y install --no-install-recommends git python3-pip python3-dicom python3-tqdm
+    eatmydata apt-get -y install --no-install-recommends git python3-pip python3-dicom python3-tqdm less
     # fresh git-annex via the datalad-installer
     python3 -m pip install --break-system-packages datalad-installer
     datalad-installer -E /tmp/dlinstaller_env.sh --sudo ok git-annex -m snapshot
