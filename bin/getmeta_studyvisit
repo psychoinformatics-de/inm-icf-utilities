@@ -17,11 +17,6 @@ from datalad.utils import md5sum
 
 lgr = logging.getLogger('inm-icf-utilities')
 
-# this points to the top of the ICF data store.
-# internally it will be amended with the missing components
-# for study and visit deposit locations
-icfstore_baseurl = 'https://data.inm-icf.de'
-
 # which DICOM tags to extract from DICOM files and store as
 # git-annex metadata (e.g., to enable metadata-driven views
 # of visit datasets)
@@ -58,7 +53,7 @@ def main(store_dir: str,
     if not tar_path.exists():
         raise ValueError(f'no tarball at {tar_path}')
 
-    runshit(
+    describe_tarball(
         # source visit tarball
         tar_path.resolve(),
         # source visit tarball URL, relative to store
@@ -70,7 +65,7 @@ def main(store_dir: str,
     )
 
 
-def runshit(tarpath, tarurl, metapath_dataset, metapath_file):
+def describe_tarball(tarpath, tarurl, metapath_dataset, metapath_file):
     # construct and dump dataset metadata
     tar_meta = {
         'size': tarpath.stat().st_size,
