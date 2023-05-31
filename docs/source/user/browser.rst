@@ -20,3 +20,18 @@ following:
    ├── P000123_dicom.tar
    ├── P000123_dicom.tar.md5sum
    └── datalad_catalog/
+
+Catalog-based browsing
+======================
+
+By entering the ``datalad_catalog`` directory, users will be able to
+browse through the directory tree with additional annotations
+of available metadata, and search for acquisitions based on keywords
+or name.
+
+Downloads
+=========
+
+tar archives and checksums can be downloaded individually by clicking
+on them in the plain directory listing of the store.
+Alternatively, they can be downloaded in the catalog browser in the ``Content`` menue of each individual acquisition.
