@@ -18,10 +18,3 @@ individuals.
    user/index
    personnel
    developer
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
