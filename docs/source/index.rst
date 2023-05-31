@@ -18,3 +18,13 @@ individuals.
    user/index
    personnel
    developer
+
+
+.. rubric:: Acknowledgements
+
+This software was developed with support from the German Federal
+Ministry of Education and Research (BMBF 01GQ1905), the US National
+Science Foundation (NSF 1912266), the Helmholtz research center Jülich
+(RDM challenge 2022), and the Deutsche Forschungsgemeinschaft (DFG,
+German Research Foundation) under grant SFB 1451 (`431549029
+<https://gepris.dfg.de/gepris/projekt/431549029>`_, INF project).
