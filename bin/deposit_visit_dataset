@@ -1,19 +1,26 @@
 #!/usr/bin/env python3
 """
+This command reads the metadata deposit from `deposit_visit_metadata` for a
+visit in a study (given by their respective identifiers) from the data store,
+and generates a DataLad dataset from it. This DataLad dataset provides
+versioned access to the visit's DICOM data, up to single-image granularity.
+Moreover, all DICOM files are annotated with basic DICOM tags that enable
+on-demand dataset views for particular applications (e.g., DICOMs sorted
+by image series and protocol name). The DataLad dataset is deposited in
+two files in the study directory:
 
+- `{visit_id}_XDLRA--refs`
+- `{visit_id}_XDLRA--repo-export`
+
+where the former enables `datalad/git clone` operations, and the latter
+represents the actual dataset as a compressed archive.
 """
 import json
 import os
 from pathlib import Path
-import sys
 import tempfile
 
 import datalad.api as dl
-
-# this points to the top of the ICF data store.
-# internally it will be amended with the missing components
-# for study and visit deposit locations
-icfstore_baseurl = 'https://data.inm-icf.de'
 
 # which DICOM tags to extract from DICOM files and store as
 # git-annex metadata (e.g., to enable metadata-driven views
@@ -28,9 +35,12 @@ dicom_metadata_keys = [
 ]
 
 
-def main(store_dir: str,
-         study_id: str,
-         visit_id: str):
+def main(
+    store_dir: str,
+    store_url: str,
+    study_id: str,
+    visit_id: str,
+):
     store_base_dir = Path(store_dir)
     # where to deposit the final datalad dataset
     repo_base_path = store_base_dir / study_id / f'{visit_id}_'
@@ -48,20 +58,27 @@ def main(store_dir: str,
         f'{visit_id}_metadata_dicoms.json'
 
     with tempfile.TemporaryDirectory(prefix='dataladify_visit_') as wdir:
-        runshit(
+        deposit_dataset(
             # workdir
             wdir,
             # path to deposited dataset metadata
             dataset_metadata_path.absolute(),
             # path to deposited file metadata
             file_metadata_path.absolute(),
+            # base URL of the store to complete access URLs
+            store_url,
             # path to deposit the repo at
             repo_base_path.absolute(),
         )
 
 
-def runshit(wdir, metapath_dataset, metapath_file, repobasepath):
-
+def deposit_dataset(
+    wdir: Path,
+    metapath_dataset: Path,
+    metapath_files: Path,
+    store_url: str,
+    repobasepath: Path,
+):
     # read tar metadata dict
     tar_metadata = read_json_file(metapath_dataset)
     expected_keys = ('size', 'md5', 'dspath', 'storepath')
@@ -88,7 +105,7 @@ def runshit(wdir, metapath_dataset, metapath_file, repobasepath):
     uncurl_uuid = repo.call_annex_records(['info', 'uncurl'])[0]['uuid']
     assert uncurl_uuid
     # register the URL of the tarball
-    tar_metadata['url'] = f"{icfstore_baseurl}/{tar_metadata['storepath']}"
+    tar_metadata['url'] = f"{store_url}/{tar_metadata['storepath']}"
     res = ds.addurls(
         [tar_metadata],
         '{url}',
@@ -98,9 +115,11 @@ def runshit(wdir, metapath_dataset, metapath_file, repobasepath):
     # fish out annex key of tarball.
     # we could also construct that, but let's not duplicate the setup above
     tarpath = Path(tar_metadata.get('dspath'))
-    tarkey = [r.get('annexkey') for r in res
-              if r.get('action') == 'fromkey'
-              and r.get('path', '').endswith(tarpath.name)]
+    tarkey = [
+        r.get('annexkey') for r in res
+        if r.get('action') == 'fromkey'
+        and r.get('path', '').endswith(tarpath.name)
+    ]
     assert len(tarkey) == 1
     tarkey = tarkey[0]
     assert tarkey
@@ -123,7 +142,7 @@ def runshit(wdir, metapath_dataset, metapath_file, repobasepath):
     assert archivist_uuid
 
     # load dicom metadata
-    dicoms = read_json_file(metapath_file)
+    dicoms = read_json_file(metapath_files)
     # add to dataset
     dicom_recs = ds.addurls(
         dicoms,
@@ -146,7 +165,10 @@ def runshit(wdir, metapath_dataset, metapath_file, repobasepath):
         repo.call_annex(['setpresentkey', dicomkey, archivist_uuid, '1'])
 
     repo.call_git([
-        'remote', 'add', 'icfstore',
+        'remote', 'add',
+        # the remote name is arbitrary, it will not end up in the resulting
+        # deposit
+        'store',
         # this is a little twisted:
         # the first line is an f-string, because we need to get the base URL
         # pointing to the study directory into the remote URL
@@ -163,7 +185,7 @@ def runshit(wdir, metapath_dataset, metapath_file, repobasepath):
     # to be able to actually push everything
     repo.call_annex(['whereis', '--key', dicomkeys[0]])
     ds.push(
-        to='icfstore',
+        to='store',
         # under no circumstances do we want to push annexed content.
         # and there also should be none
         data='nothing',
@@ -174,31 +196,36 @@ def read_json_file(file_path):
     """
     Load content from catalog metadata file for current node
     """
-    try:
-        with open(file_path) as f:
-            return json.load(f)
-    except OSError as err:
-        raise("OS error: {0}".format(err))
-    except:
-        raise("Unexpected error:", sys.exc_info()[0])
+    with open(file_path) as f:
+        return json.load(f)
 
 
 if __name__ == '__main__':
     import argparse
-    p = argparse.ArgumentParser(description=__doc__)
+    p = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    p.add_argument(
+        '--id', nargs=2, metavar=('STUDY-ID', 'VISIT-ID'), required=True,
+        help="study and visit identifiers, used to "
+        "locate the visit archive in the storage organization. "
+    )
     p.add_argument(
         "-o", "--store-dir", metavar='PATH', default=os.getcwd(),
-        help="Root directory of the ICF data store. "
+        help="root directory of the data store. "
         "Visit data will be read from it, and the DataLad dataset will be "
         "deposited into it."
     )
     p.add_argument(
-        '--id', nargs=2, metavar=('STUDY-ID', 'VISIT-ID'), required=True,
-        help="The study and visit identifiers, used to "
-        "locate the visit archive in the storage organization. "
+        '--store-url', metavar='URL', default='https://data.inm-icf.de',
+        help="base URL of the DICOM data store. This URL is used to "
+        "register TAR archive download URLs in the generated DataLad "
+        "dataset."
     )
     args = p.parse_args()
     main(store_dir=args.store_dir,
+         store_url=args.store_url,
          study_id=args.id[0],
          visit_id=args.id[1],
     )
