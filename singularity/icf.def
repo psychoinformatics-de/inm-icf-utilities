@@ -1,0 +1,39 @@
+Bootstrap: docker
+From: debian:bookworm-slim
+
+%labels
+    Author michael.hanke@gmail.com
+    Version v0.1.0
+
+%help
+    INM ICF utilties.
+
+
+%post
+    # install all non-datalad deps from Debian proper
+    apt-get update -qq
+    apt-get -y install eatmydata
+    eatmydata apt-get -y install --no-install-recommends git python3-pip python3-dicom python3-tqdm
+    # fresh git-annex via the datalad-installer
+    python3 -m pip install --break-system-packages datalad-installer
+    datalad-installer -E /tmp/dlinstaller_env.sh --sudo ok git-annex -m snapshot
+    # datalad-installer cannot install outside /tmp, which will not make it
+    # into the final image, move
+    mv $(cut -d = -f 2 < /tmp/dlinstaller_env.sh | cut -d : -f 1) /git-annex
+    # the inm-icf-utilities
+    git clone https://github.com/psychoinformatics-de/inm-icf-utilities.git /inm-icf-utils
+    # and the inm-icf-utilities dependencies
+    python3 -m pip install --break-system-packages -r /inm-icf-utils/requirements-devel.txt
+    # enable "next" extension for patching datalad core, done inside the image, not
+    # for a particular user
+    git config --system datalad.extensions.load next
+
+
+
+# add the custom ICF scripts to the PATH at runtime
+%environment
+    export PATH=/inm-icf-utils/bin:/git-annex:$PATH
+
+
+%runscript
+    exec "$@"

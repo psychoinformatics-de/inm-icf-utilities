@@ -23,14 +23,6 @@ environment:
   # This requires setting `APPVEYOR_SSH_KEY` and `APPVEYOR_SSH_BLOCK`
   ACTIVATE_SSH_LOGIN: no
 
-  # The following variables should be kept in sync with INM-ICF's
-  # system configuration.
-  ICF_PYTHON_VERSION: 3.9
-  ICF_GIT_VERSION: 2.30.2
-  ICF_GIT_ANNEX_VERSION: 10.20221003
-
-  INSTALL_GITANNEX: git-annex -m snapshot
-
   # The root for study data and the studies that we simulate. These variables
   # are available throughout ``install:´´ and in the executed scripts.
   FROM_SCANNER: /data/incoming
@@ -43,15 +35,30 @@ skip_commits:
     - README.md
     - .readthedocs.yaml
 
+cache:
+  # we reuse the image unless the recipe or the scripts change
+  # ATTN: This means that updates to software dependencies will not
+  # trigger an image update!! If that is desired, the build cache needs
+  # to be wiped first:
+  # https://www.appveyor.com/docs/build-cache/#cleaning-up-cache
+  - icf.sif -> singularity/icf.def, bin/*
+  - singularity-container_3.8.7_amd64.deb
+
+artifacts:
+  - path: icf.sif
+    name: ICF utils singularity image
+    type: File
+
 # In `install` we prep the test system with any non-DataLad tooling
 install:
+  - curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
   # Bootstrap ICF-like system installation
   - sudo .appveyor/install_apt_pkgs
-  - .appveyor/apache_enable_user_dir
-  # Install tooling for data ingestion.
-  # ICF uses a system installation via APT. Here we only match the respective
-  # versions of Debian bullseye (the Ubuntu 2004 base image is too old)
-  - sudo python3 -m pip install pydicom==2.0.0 tqdm==4.57.0
+  # build the singularity image, unless we got it from the cache
+  - sh: "[ ! -f icf.sif ] && singularity build --fakeroot icf.sif singularity/icf.def || true"
+  # install image as `icf-utils` (mounting the ICF /data store on-run)
+  - sh: echo -e '#!/bin/sh\nset -e -u\nsingularity run -B /data /home/appveyor/projects/inm-icf-utilities/icf.sif "$@"' > icf-utils
+  - sudo install -t /usr/bin icf-utils
 
   # Bootstrap ICF data organization
   # Create data input directory and populate it
@@ -60,18 +67,33 @@ install:
       for s in $STUDIES; do
         sudo .appveyor/data_create_scanner_output $FROM_SCANNER $s 10 20;
       done
-  # Create study directories
+  # Create ICF store
+  - sudo mkdir /data/archive
+  # we use the 'appveyor' group as a placeholder for the actual ICF group
+  # which has write access on the real system
+  - sudo chown :appveyor /data/archive
+  - sudo chmod g+ws /data/archive
+
+  # Run the non-DataLad DICOM data ingestion script. Create two visits, i.e.
+  # ``visit_a´´ and ``visit_b´´, for each study defined in ${STUDIES}
   - sh:
       for s in $STUDIES; do
-        sudo mkdir -p "$STUDIES_DIR"/$s;
+        for v in visit_a visit_b; do
+          icf-utils make_studyvisit_archive
+            --output-dir "$STUDIES_DIR"
+            --id $s $v
+            "$FROM_SCANNER";
+        done
       done
-  # Create user http content and create links to the studies in. The http server
-  # is configured to follow only links if the owner of the link matches the
-  # owner of the target. Therefore, user ``root´´ has to create the links.
+  # show the full store/incoming content before any DataLad business
+  - tree /data/
+
+  # Create user http content and create links to the studies in.
+  - .appveyor/apache_enable_user_dir
   - mkdir ~/public_html
   - sh:
       for s in $STUDIES; do
-        sudo ln -s "$STUDIES_DIR"/$s /home/appveyor/public_html/$s;
+        ln -s "$STUDIES_DIR"/$s /home/appveyor/public_html/$s;
       done
   # Enable basic authentication and authorization for the study directories. The
   # username is ``test.user´´, the password is ``secret_1´´.
@@ -80,18 +102,6 @@ install:
         $STUDIES_DIR
         test.user secret_1
         $STUDIES
-
-  # Run the non-DataLad DICOM data ingestion script. Create two visits, i.e.
-  # ``visit_a´´ and ``visit_b´´, for each study defined in ${STUDIES}
-  - sh:
-      for s in $STUDIES; do
-        for v in visit_a visit_b; do
-          sudo bin/make_studyvisit_archive
-            --output-dir "$STUDIES_DIR"
-            --id $s $v
-            "$FROM_SCANNER";
-        done
-      done
 
   # Enable external SSH access to CI worker on all other systems. This uses the
   # public key defined in APPVEYOR_SSH_KEY. If APPVEYOR_SSH_BLOCK is ``true´´,
@@ -113,42 +123,30 @@ build_script:
   # Set up git identification
   - git config --global user.email "test@appveyor.land"
   - git config --global user.name "Appveyor Almighty"
-  # Enable "next" extension for patching datalad core
-  - git config --global datalad.extensions.load next
-
-  # install into virtual env that matches the Python version on the ICF system
-  - . ~/venv3.9/bin/activate
-  # Install requirements
-  # git-annex
-  - .appveyor/install_git_annex ${INSTALL_GITANNEX}
-  # enable the git-annex provisioned by the installer
-  - "[ -f ${HOME}/dlinstaller_env.sh ] && . ${HOME}/dlinstaller_env.sh || true"
-  # all remaining deps after git-annex
-  - python -m pip install -r requirements-devel.txt
-
-  # Check program versions and report
-  - .appveyor/check_versions --warn-only ${ICF_PYTHON_VERSION} ${ICF_GIT_VERSION} ${ICF_GIT_ANNEX_VERSION}
 
 
 before_test:
   # simple call to see if datalad and git-annex are installed properly
-  - datalad wtf
+  - icf-utils datalad wtf
 
 
 test_script:
   # run tests found in the $PROJECT_ROOT/test directory
   - mkdir __testhome__
   - cd __testhome__
-  - which python
-  - python --version
   - sh:
       if [ X"$ACTIVATE_SSH_LOGIN" == "Xpre-tests" ]; then
         curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
       fi
-  - python -m pytest -s -v ../tests
+  - icf-utils python3 -m pytest -s -v ../tests
   - sh:
       if [ X"$ACTIVATE_SSH_LOGIN" == "Xpost-tests" ]; then
         curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
         touch $HOME/build.lock;
         while [ -e $HOME/build.lock ]; do sleep 5; done;
       fi;
+
+
+on_finish:
+  # conditionally block the exit of a CI run for direct debugging
+  - sh: while [ -f ~/BLOCK ]; do sleep 5; done
