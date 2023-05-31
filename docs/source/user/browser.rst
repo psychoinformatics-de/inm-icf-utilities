@@ -12,3 +12,11 @@ following:
 * (optional) a ``catalog`` directory containing a catalog of the study
   visits (which can be used to view e.g. available modalities and
   DICOM series for each visit)
+
+
+.. code-block:: console
+
+   data.inm-icf.de/my-study
+   ├── P000123_dicom.tar
+   ├── P000123_dicom.tar.md5sum
+   └── datalad_catalog/
