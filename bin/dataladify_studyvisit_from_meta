@@ -64,7 +64,7 @@ def runshit(wdir, metapath_dataset, metapath_file, repobasepath):
 
     # read tar metadata dict
     tar_metadata = read_json_file(metapath_dataset)
-    expected_keys = ('size', 'md5', 'path', 'url')
+    expected_keys = ('size', 'md5', 'dspath', 'storepath')
     if not all(k in tar_metadata for k in expected_keys):
         raise ValueError(f'incomplete tarball metadata at {metapath_dataset}')
 
@@ -88,15 +88,16 @@ def runshit(wdir, metapath_dataset, metapath_file, repobasepath):
     uncurl_uuid = repo.call_annex_records(['info', 'uncurl'])[0]['uuid']
     assert uncurl_uuid
     # register the URL of the tarball
+    tar_metadata['url'] = f"{icfstore_baseurl}/{tar_metadata['storepath']}"
     res = ds.addurls(
         [tar_metadata],
         '{url}',
-        '{path}',
+        '{dspath}',
         key='et:MD5-s{size}--{md5}',
     )
     # fish out annex key of tarball.
     # we could also construct that, but let's not duplicate the setup above
-    tarpath = Path(tar_metadata.get('path'))
+    tarpath = Path(tar_metadata.get('dspath'))
     tarkey = [r.get('annexkey') for r in res
               if r.get('action') == 'fromkey'
               and r.get('path', '').endswith(tarpath.name)]
