@@ -21,11 +21,12 @@ From: debian:bookworm-slim
     # into the final image, move
     mv $(cut -d = -f 2 < /tmp/dlinstaller_env.sh | cut -d : -f 1) /git-annex
     # the inm-icf-utilities
-    git clone https://github.com/psychoinformatics-de/inm-icf-utilities.git /inm-icf-utils
+    # TODO: remove "-b enh-ci-setup" once the certificates are merged into main
+    git clone -b enh-ci-setup https://github.com/psychoinformatics-de/inm-icf-utilities.git /inm-icf-utils
     # and the inm-icf-utilities dependencies
     python3 -m pip install --break-system-packages -r /inm-icf-utils/requirements-devel.txt
     # add the test CA
-    cat /inm-icf-utils/.appveyor/data/ChristianMoenchCA.crt >> $(python3 -c "import certifi; print(certifi.where())")
+    cat /inm-icf-utils/.appveyor/data/INM-ICF-TestCA.crt >> $(python3 -c "import certifi; print(certifi.where())")
     # enable "next" extension for patching datalad core, done inside the image, not
     # for a particular user
     git config --system datalad.extensions.load next
