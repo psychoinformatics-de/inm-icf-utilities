@@ -16,7 +16,7 @@ individuals.
    :caption: Contents:
 
    user/index
-   personnel
+   admin
    developer
 
 Indices and tables
