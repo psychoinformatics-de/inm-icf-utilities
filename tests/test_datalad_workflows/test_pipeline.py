@@ -56,7 +56,7 @@ def process_visits(studies_dir: Path,
             )
             # run dataladification script
             run_script(
-                'dataladify_studyvisit_from_meta',
+                'deposit_visit_dataset',
                 studies_dir,
                 study, visit
             )
