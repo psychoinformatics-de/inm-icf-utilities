@@ -3,5 +3,9 @@
 set -e -u
 
 apt-get update -qq
-apt-get install eatmydata
 eatmydata apt-get -y install apache2
+# deploy singularity v2, matching the ICF deployment
+# only download when not already cached
+[ ! -f singularity-container_3.8.7_amd64.deb ] && wget https://github.com/apptainer/singularity/releases/download/v3.8.7/singularity-container_3.8.7_amd64.deb || true
+eatmydata dpkg -i singularity-container_3.8.7_amd64.deb
+eatmydata apt-get install -f

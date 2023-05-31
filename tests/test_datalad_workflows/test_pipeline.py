@@ -33,7 +33,7 @@ def run_script(name: str,
     script_path = Path(*(Path(__file__).parts[:-3] + ('bin',))) / name
     runner = WitlessRunner(cwd=working_directory, env=dict(os.environ))
     runner.run(
-        (['sudo', '-E', '--preserve-env=PATH'] if on_appveyor else []) + [
+        [
             str(script_path),
             '--id',
             study_id,
