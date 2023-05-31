@@ -79,8 +79,15 @@ get`. DataLad will handle download and unpacking of the tar file.
 Take a look at the section :ref:`dl-advanced` to learn about
 useful convenience features DataLad adds on top of this.
 
+Catalog-based clone URLs
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. rubric:: footnotes
+Instead of crafting clone URLs by hand, the ``datalad_catalog``
+directory in the data store displays a copy-paste URL for cloning when
+clicking the "Download with DataLad" button on each individual visit ID.
+
+
+.. rubric:: Footnotes
 
 .. [1] To install software with pip, run a call such as the one below
        in your favourite `virtual environment <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/>`_::
