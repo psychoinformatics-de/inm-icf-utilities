@@ -41,10 +41,22 @@ available under an ``icf-utils`` command.
 
    $ sudo install -t /usr/bin icf-utils
 
-Tarball generation
-^^^^^^^^^^^^^^^^^^
+Archival workflow
+^^^^^^^^^^^^^^^^^
 
 The main part of visit archival is the creation a TAR file.
+
+The DataLad dataset can be generated and placed alongside the tarballs
+without affecting them. Placement in the study folder guarantees the
+same access permissions (authenticated https). The datasets are
+generated based on file metadata -- the TAR archive remains the only
+data source -- so storage overhead is minimal.
+
+Four scripts, executed in the given order, capture the archival
+process.
+
+Script listing
+^^^^^^^^^^^^^^
 
 ``make_studyvisit_archive``
 """""""""""""""""""""""""""
@@ -68,18 +80,6 @@ for any non-DICOM file is set to the latest timestamp across all DICOM files.
 
    $ icf-utils make_studyvisit_archive --help
    usage: make_studyvisit_archive [-h] [-o PATH] --id STUDY-ID VISIT-ID <input-dir>
-
-DataLad dataset generation
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The DataLad dataset can be generated and placed alongside the tarballs
-without affecting them. Placement in the study folder guarantees the
-same access permissions (authenticated https). The datasets are
-generated based on file metadata -- the TAR archive remains the only
-data source -- so storage overhead is minimal.
-
-All scripts have the same set of arguments as the tarball generation
-script.
 
 ``deposit_visit_metadata``
 """"""""""""""""""""""""""
