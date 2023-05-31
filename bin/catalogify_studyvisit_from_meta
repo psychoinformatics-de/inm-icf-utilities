@@ -128,7 +128,7 @@ def generate_visit_entry(study_id, visit_id, metapath_dataset, metapath_file):
     """"""
         # Create base visit entry
     desc=f"""This page presents the DICOM data collected for the visit
-    {visit_id} during the imaging study: {study_id}. Browse through details
+    {visit_id} during the imaging study {study_id}. Browse through details
     of this particular study visit in the 'DICOM' tab below."""
     meta_item = new_dataset_meta_item(
         ds_id=str(uuid4()),
