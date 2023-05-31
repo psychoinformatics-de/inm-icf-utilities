@@ -27,7 +27,7 @@ From: debian:bookworm-slim
     git clone -b enh-ci-https https://github.com/christian-monch/inm-icf-utilities.git /inm-icf-utils
     # and the inm-icf-utilities dependencies
     python3 -m pip install --break-system-packages -r /inm-icf-utils/requirements-devel.txt
-    # add the test CA
+    # add the test CA to certifi to allow 'requests' to work with the ssl-server
     cat /inm-icf-utils/.appveyor/data/INM-ICF-TestCA.crt >> $(python3 -c "import certifi; print(certifi.where())")
     # enable "next" extension for patching datalad core, done inside the image, not
     # for a particular user
