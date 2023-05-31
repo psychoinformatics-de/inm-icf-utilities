@@ -28,6 +28,7 @@ def run_script(name: str,
                working_directory: str | Path,
                study_id: str,
                visit_id: str,
+               *args
                ):
 
     script_path = Path(*(Path(__file__).parts[:-3] + ('bin',))) / name
@@ -37,28 +38,31 @@ def run_script(name: str,
             str(script_path),
             '--id',
             study_id,
-            visit_id
+            visit_id,
+            *args
         ]
     )
 
 
 def process_visits(studies_dir: Path,
                    studies: list[str],
-                   visits: list[str]
+                   visits: list[str],
+                   baseurl: str,
                    ):
     for study in studies:
         for visit in visits:
             # run metadata generation script
             run_script(
-                'getmeta_studyvisit',
+                'deposit_visit_metadata',
                 studies_dir,
                 study, visit
             )
             # run dataladification script
             run_script(
-                'dataladify_studyvisit_from_meta',
+                'deposit_visit_dataset',
                 studies_dir,
-                study, visit
+                study, visit,
+                '--store-url', baseurl,
             )
             # run catalogification script
             run_script(
@@ -140,6 +144,7 @@ def test_pipeline(tmp_path: Path,
         Path(test_studies_dir),
         test_study_names,
         existing_visits,
+        data_webserver,
     )
 
     # 1. Test metadata generation
@@ -166,11 +171,8 @@ def test_pipeline(tmp_path: Path,
                 dataaccess_credential,
                 credman,
             )
-            # TODO reenable once the server setup is actually compatible
-            # TODO swap the order of gets, or actually drop the tar get
-            # completely. Pulling individual files will do all that internally
-            # Try to get the tar file and the DICOMs
-            #dataset.get(f'icf/{visit}_dicom.tar')
+            # pull all individual DICOM files, this will internally
+            # access/download the archive at the store
             dataset.get(f'{study}_{visit}')
 
     # 3. Test catalog generation
