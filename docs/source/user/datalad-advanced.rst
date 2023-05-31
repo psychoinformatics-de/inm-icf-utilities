@@ -1,4 +1,4 @@
-DataLad datasets: advanced features
+DataLad datasets: Advanced features
 -----------------------------------
 
 Dicom sorting
@@ -84,7 +84,7 @@ Order of the components can be inverted:
    └── 7/
        └── t2w_space_0.9mm/
 
-Previews views, and the starting branch, can be restored with
+Previous views, and the starting branch, can be restored with
 
 .. code-block:: console
 
