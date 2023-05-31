@@ -21,8 +21,10 @@ From: debian:bookworm-slim
     # into the final image, move
     mv $(cut -d = -f 2 < /tmp/dlinstaller_env.sh | cut -d : -f 1) /git-annex
     # the inm-icf-utilities
-    # TODO: remove "-b enh-ci-setup" once the certificates are merged into main
-    git clone -b enh-ci-setup https://github.com/psychoinformatics-de/inm-icf-utilities.git /inm-icf-utils
+    # TODO: replace the git clone command below with:
+    # TODO:   "git clone https://github.com/psychoinformatics-de/inm-icf-utilities.git /inm-icf-utils"
+    # TODO:   once the certificates are merged into main
+    git clone -b enh-ci-https https://github.com/christian-monch/inm-icf-utilities.git /inm-icf-utils
     # and the inm-icf-utilities dependencies
     python3 -m pip install --break-system-packages -r /inm-icf-utils/requirements-devel.txt
     # add the test CA
