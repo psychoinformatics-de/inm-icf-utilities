@@ -76,6 +76,8 @@ Given the exemplary values above, the pattern would expand to
 Cloning will retrieve a lightweight dataset, which does not (yet)
 contain file content. File content can be retrieved with `datalad
 get`. DataLad will handle download and unpacking of the tar file.
+Take a look at the section :ref:`dl-advanced` to learn about
+useful convenience features DataLad adds on top of this.
 
 
 .. rubric:: footnotes

@@ -1,3 +1,5 @@
+.. _dl-advanced:
+
 DataLad datasets: Advanced features
 -----------------------------------
 
