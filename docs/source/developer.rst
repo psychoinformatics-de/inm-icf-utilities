@@ -51,7 +51,7 @@ and can be downloaded from `ci.appveyor.com/api/projects/mih/inm-icf-utilities/a
 When testing changes to the INM-ICF-utilities, the Singularity image needs to be
 rebuilt with the changes included.
 Its recipe can be found under ``singularity/icf.def``.
-The image can be rebuild automatically using the Appveyor-based CI testsuite.
+The image can be rebuilt automatically using the Appveyor-based CI test suite.
 If only software dependencies change, an update is **not** triggered automatically
 but requires that the `build cache is wiped <https://www.appveyor.com/docs/build-cache/#cleaning-up-cache>`_.
 
