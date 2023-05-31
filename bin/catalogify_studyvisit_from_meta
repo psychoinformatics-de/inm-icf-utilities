@@ -12,7 +12,6 @@ import sys
 import tempfile
 from uuid import uuid4
 
-import datalad.api as dl
 from datalad_catalog.catalog import Catalog
 from datalad_catalog.webcatalog import WebCatalog
 
@@ -95,7 +94,7 @@ def get_catalog(study_id, catalog_path):
         # 3. set catalog home page
         ctlg.main_id = study_entry.get('dataset_id')
         ctlg.main_version = study_entry.get('dataset_version')
-        ctlg.set_main_dataset() 
+        ctlg.set_main_dataset()
     return ctlg
 
 
@@ -109,7 +108,7 @@ def generate_study_entry(study_id):
         ds_version='latest',
         ds_name=study_id,
         ds_description=desc)
-    
+
 
 def update_entry(ds_id, ds_version, ds_name, key, value, study_catalog_path):
     meta_item = {
@@ -245,7 +244,6 @@ def format_bytes(bytes, decimals=2):
     sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
     i = int(math.floor(math.log(bytes) / math.log(k)))
     return f"{round(bytes / math.pow(k, i), dm)} {sizes[i]}"
-
 
 
 if __name__ == '__main__':
