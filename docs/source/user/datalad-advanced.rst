@@ -6,7 +6,8 @@ DataLad datasets: Advanced features
 Dicom sorting
 ^^^^^^^^^^^^^
 
-A visit dataset will have a structure similar to the following:
+Because DataLad automatically unpacks the DICOM tar archives, a
+cloned visit dataset will have a structure similar to the following:
 
 .. code-block:: console
 
@@ -19,13 +20,13 @@ A visit dataset will have a structure similar to the following:
    │               └── P001234/
    └── icf/
 
-where the ``P001234`` directory contains DICOM files in a flat
+The ``P001234`` directory contains DICOM files in a flat
 hierarchy, and the ``icf`` directory contains the original tar
 archive.
 
 The dataset exposes a few select DICOM header fields (with information
 describing its corresponding DICOM series) as `git-annex metadata`_.
-You can preview metadata for a selected file with ``git annex
+You can preview available metadata for a selected file with ``git annex
 metadata`` (subset shown):
 
 .. code-block:: console
@@ -39,8 +40,8 @@ metadata`` (subset shown):
    SeriesNumber=10
 
 These metadata can be used to organize DICOM files according to a
-logical structure. For example, grouping by protocol name and series
-number:
+logical structure. For example, grouping by all available (as
+specified with ``*``) protocol names and series numbers:
 
 .. code-block:: console
 
@@ -60,7 +61,8 @@ number:
       └── 4/
       └── 5/
       
-The view can be filtered, e.g. to only show anatomical (T1 or T2) sequences:
+The view can be `filtered`_, e.g. to only show anatomical (T1 or T2,
+as specified with ``t[12]``) sequences:
 
 .. code-block:: console
 
@@ -73,7 +75,9 @@ The view can be filtered, e.g. to only show anatomical (T1 or T2) sequences:
    └── t2w_space_0.9mm/
        └── 7/
 
-Order of the components can be inverted:
+.. _filtered: https://git-annex.branchable.com/git-annex-vfilter
+
+Order of the components can be inverted using `vcycle`_:
    
 .. code-block:: console
 
@@ -86,11 +90,15 @@ Order of the components can be inverted:
    └── 7/
        └── t2w_space_0.9mm/
 
-Previous views, and the starting branch, can be restored with
+.. _vcycle: https://git-annex.branchable.com/git-annex-vcycle/
+
+Previous views, and the starting branch, can be restored with `vpop`_:
 
 .. code-block:: console
 
   $ git annex vpop
+
+.. _vpop: https://git-annex.branchable.com/git-annex-vpop/
 
 As the operations only create views (and the annexed data organization
 remains the same), these operations are very fast.
