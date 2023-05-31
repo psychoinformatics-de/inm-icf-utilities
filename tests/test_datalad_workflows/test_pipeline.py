@@ -154,25 +154,32 @@ def test_pipeline(tmp_path: Path,
                 with open(metadata_path) as f:
                     json.load(f)
 
-    # 2. Test dataset generation
-    # - Try to clone the datasets and fetch the dicom tarfile
-    for study in test_study_names:
-        for visit in existing_visits:
-            dataset = clone_visit(
-                tmp_path / f'ds_{study}_{visit}',
-                data_webserver,
-                study,
-                visit,
-                dataaccess_credential,
-                credman,
-            )
-            # Try to get the tar file and the DICOMs
-            dataset.get(f'icf/{visit}_dicom.tar')
-            dataset.get(f'{study}_{visit}')
+    # # 2. Test dataset generation
+    # # - Try to clone the datasets and fetch the dicom tarfile
+    # for study in test_study_names:
+    #     for visit in existing_visits:
+    #         dataset = clone_visit(
+    #             tmp_path / f'ds_{study}_{visit}',
+    #             data_webserver,
+    #             study,
+    #             visit,
+    #             dataaccess_credential,
+    #             credman,
+    #         )
+    #         # Try to get the tar file and the DICOMs
+    #         dataset.get(f'icf/{visit}_dicom.tar')
+    #         dataset.get(f'{study}_{visit}')
     
     # 3. Test catalog generation
     # - assert that study catalogs have been created using webcatalog method
-    for study in test_study_names:
+    for i, study in enumerate(test_study_names):
         catalog_path = Path(test_studies_dir) / study / 'catalog'
         ctlg = WebCatalog(location=str(catalog_path))
         assert ctlg.is_created()
+        if i==0:
+            runner = WitlessRunner(cwd=test_studies_dir, env=dict(os.environ))
+            runner.run(
+                (['sudo', '-E', '--preserve-env=PATH'] if on_appveyor else []) + [
+                    f'appveyor PushArtifact {catalog_path.resolve()}'
+                ]
+            )

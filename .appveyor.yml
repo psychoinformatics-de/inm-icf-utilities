@@ -152,3 +152,7 @@ test_script:
         touch $HOME/build.lock;
         while [ -e $HOME/build.lock ]; do sleep 5; done;
       fi;
+
+# artifacts:
+#   - path: /data/archive/study_1/catalog
+#     name: TestCatalog
