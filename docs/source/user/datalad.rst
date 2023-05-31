@@ -43,17 +43,31 @@ Clone & get
 A visit dataset can be cloned with DataLad from a URL containing the
 following components:
 
-* store base URL
-* study ID
-* visit ID
+* store base URL (e.g., ``https://data.inm-icf.de``)
+* study ID (e.g., ``my-study``)
+* visit ID (e.g., ``P000123``)
 * a set of additional parameters, always constant
 
 The pattern for the URL is::
 
     'datalad-annex::?type=external&externaltype=uncurl&url=<store base URL>/<study ID>/<visit ID>_{{annex_key}}&encryption=none'
-  
-.. note:: A convenience short cut can be provided via configuration
-   item ``datalad.clone.url-substitute...``
+
+Given the exemplary values above, the pattern would expand to
+
+.. code-block::
+
+    'datalad-annex::?type=external&externaltype=uncurl&url=https://data.inm-icf.de/my-study/P000123_{{annex_key}}&encryption=none'
+
+.. note:: The URL is arguably a bit clunky. A convenience short cut can be provided via configuration item ``datalad.clone.url-substitute.<label>`` and a substitution rule based on regular expressions. For example, clone URLs can be shortened to require only an identifier (here, ``inm-icf``), study ID, and visit ID (``inm-icf/<study-ID>/<visit-ID>``) with the following configuration:
+
+   .. code-block::
+
+      git config --global datalad.clone.url-substitute.inm-icf ',^inm-icf://([^/]+)/(.*)$,datalad-annex::?type=external&externaltype=uncurl&url=https://data.inm-icf.de/\1/\2_{{annex_key}}&encryption=none'
+
+   This configuration allows DataLad to take any URL of the form ``inm-icf/<study-ID>/<visit-ID>`` and assemble the required ``datalad-annex::...`` URL on its own, and a clone call shortens into ``datalad clone inm-icf/my-study/P000123``.
+   Further documentation of this configuration can be found in the `DataLad Docs`_.
+
+.. _DataLad Docs: http://docs.datalad.org/en/stable/design/url_substitution.html
 
 Cloning will retrieve a lightweight dataset, which does not (yet)
 contain file content. File content can be retrieved with `datalad
