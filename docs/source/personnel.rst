@@ -1,5 +1,5 @@
-ICF Personnel guide
-===================
+Administrator docs
+==================
 
 The INM-ICF Utilities Github repository provides a set of executable
 Python scripts which automate generation of deposits in the ICF
