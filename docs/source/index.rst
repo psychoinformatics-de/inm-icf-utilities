@@ -3,8 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to INM ICF utilities's documentation!
-=============================================
+Welcome to the documentation of the INM ICF utilities!
+======================================================
 
 The ICF archive provides storage of MRI data acquisitions in DICOM
 format for the purpose of long-term data preservation, with the
