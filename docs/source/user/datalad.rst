@@ -6,9 +6,14 @@ Software requirements
 
 Accessing the ICF store requires `DataLad`_ with `Datalad-Next`_
 extension installed.
+You can find instructions for installing DataLad on your operating
+system in the `DataLad Handbook`_.
+`Datalad-Next`_ can be installed with `pip`_ [1]_.
 
 .. _datalad: https://www.datalad.org/
 .. _datalad-next: https://docs.datalad.org/projects/next
+.. _datalad handbook: https://handbook.datalad.org/intro/installation.html
+.. _pip: https://pip.pypa.io/en/stable/
 
 Credentials
 ^^^^^^^^^^^
@@ -72,3 +77,11 @@ Given the exemplary values above, the pattern would expand to
 Cloning will retrieve a lightweight dataset, which does not (yet)
 contain file content. File content can be retrieved with `datalad
 get`. DataLad will handle download and unpacking of the tar file.
+
+
+.. rubric:: footnotes
+
+.. [1] To install software with pip, run a call such as the one below
+       in your favourite `virtual environment <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/>`_::
+
+              python -m pip install datalad-next
