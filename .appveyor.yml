@@ -53,6 +53,7 @@ artifacts:
 install:
   - curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
   # Bootstrap ICF-like system installation
+  - sudo hostname data.inm-icf.de
   - sudo .appveyor/install_apt_pkgs
   - .appveyor/apache_enable_ssl
   - .appveyor/apache_enable_user_dir
@@ -125,10 +126,6 @@ build_script:
   # Set up git identification
   - git config --global user.email "test@appveyor.land"
   - git config --global user.name "Appveyor Almighty"
-
-  # Add our private CA root certificate to certify and change the hostname to match the certificate
-  - cat /usr/lib/ssl/certs/ChristianMoenchCA.pem >> /home/appveyor/venv3.9/lib/python3.9/site-packages/certifi/cacert.pem
-  - sudo hostname data.inm-icf.de
 
 before_test:
   # simple call to see if datalad and git-annex are installed properly
