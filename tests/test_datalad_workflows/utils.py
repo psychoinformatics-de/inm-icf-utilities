@@ -1,22 +1,24 @@
 from __future__ import annotations
 
-import requests
-import www_authenticate
+from datalad_next.url_operations.http import HttpUrlOperations
 
 
 def get_restricted_realm(url: str) -> str | None:
-    """A very simple function to get the realm for restricted access
+    """Get the realm for basic auth-restricted access
 
-    This will only work, if the server returns a 'www-authenticate'-
-    header, and if the authentication method is 'basic'
+    Parameters
+    ----------
+    url: str
+      URL to probe
+
+    Returns
+    -------
+    str | None
+      The name of the realm for basic authentication
+      or None, if either no authentication is required,
+      or if the authentication type is not "basic"
     """
 
-    r = requests.get(url)
-
-    auth_header_name = 'WWW-Authenticate'
-    auth_header = r.headers.get(auth_header_name, None)
-    if auth_header:
-        parsed = www_authenticate.parse(auth_header)
-        if 'Basic' in parsed:
-            return parsed['Basic']['realm']
-    return None
+    http_url_ops = HttpUrlOperations()
+    _, url_properties = http_url_ops.probe_url(url)
+    return url_properties.get('auth', {}).get('basic', {}).get('realm')
