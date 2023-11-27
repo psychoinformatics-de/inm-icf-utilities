@@ -112,8 +112,8 @@ files, in JSON format, in the study directory:
 
 .. code-block:: console
 
-  $ icf-utils getmeta_studyvisit -h
-  usage: getmeta_studyvisit [-h] [-o PATH] --id STUDY-ID VISIT-ID
+  $ icf-utils deposit_visit_metadata -h
+  usage: deposit_visit_metadata [-h] [-o PATH] --id STUDY-ID VISIT-ID
 
 ``deposit_visit_dataset``
 """""""""""""""""""""""""
@@ -136,8 +136,8 @@ represents the actual dataset as a compressed archive.
 
 .. code-block:: console
 
-   $ icf-utils dataladify_studyvisit_from_meta -h
-   usage: dataladify_studyvisit_from_meta [-h] [-o PATH] --id STUDY-ID VISIT-ID
+   $ icf-utils deposit_visit_dataset -h
+   usage: deposit_visit_dataset [-h] --id STUDY-ID VISIT-ID [-o PATH] [--store-url URL]
 
 ``catalogify_studyvisit_from_meta``
 """""""""""""""""""""""""""""""""""
@@ -149,4 +149,4 @@ folder in the study directory.
 .. code-block:: console
 
   $ icf-utils dataladify_studyvisit_from_meta --help
-  usage: dataladify_studyvisit_from_meta [-h] [-o PATH] --id STUDY-ID VISIT-ID
+  usage: catalogify_studyvisit_from_meta [-h] [-o PATH] --id STUDY-ID VISIT-ID
