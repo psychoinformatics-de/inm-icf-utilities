@@ -34,4 +34,4 @@ Downloads
 
 tar archives and checksums can be downloaded individually by clicking
 on them in the plain directory listing of the store.
-Alternatively, they can be downloaded in the catalog browser in the ``Content`` menue of each individual acquisition.
+Alternatively, they can be downloaded in the catalog browser in the ``Content`` menu of each individual acquisition.
