@@ -3,5 +3,5 @@ datalad-next
 pydicom
 pytest
 pytest-env
-datalad-catalog
+datalad-catalog==0.2.1b0 --pre
 www-authenticate
