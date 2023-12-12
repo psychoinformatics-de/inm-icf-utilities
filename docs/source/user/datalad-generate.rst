@@ -35,12 +35,31 @@ Download the visit tarball:
    datalad download ...
    cd ../..
 
-Deposit visit metadata alongside tarball
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+For the following examples, the *absolute path* to the local dicom
+store will be represented by ``$STORE_DIR``:
 
 .. code-block:: bash
 
-   singularity run -B $STORE_DIR icf.sif deposit_visit_metadata --store-dir $STORE_DIR --id <project-ID> <visit ID>
+   export STORE_DIR=$PWD/local_dicomstore
+
+
+Deposit visit metadata alongside tarball
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Information required to create a DataLad dataset needs to be extracted
+from the tarball:
+
+.. code-block:: bash
+
+   singularity run -B $STORE_DIR icf.sif deposit_visit_metadata \
+     --store-dir $STORE_DIR --id <project-ID> <visit ID>
+
+This will generate two files, ``<visit ID>_metadata_dicoms.json`` and
+``<visit ID>_metadata_tarball.json``, and place them alongside the
+tarball. The former contains metadata describing individual files
+within the tarball (relative path, MD5 checksum, size, and a small
+subset of DICOM headers describing acquisition type), and the latter
+describes the tarball itself.
 
 Deposit dataset alongside tarball
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -54,11 +73,24 @@ for retrieval by dataset clones.
 
 .. code-block:: bash
 
-   singularity run -B $STORE_DIR icf.sif deposit_visit_dataset --store-dir $STORE_DIR --store-url <ICF STORE URL>
+   singularity run -B $STORE_DIR icf.sif deposit_visit_dataset \
+     --store-dir $STORE_DIR --store-url <ICF STORE URL>
 
-This will produce two files, ...
+This will produce two files, ``<visit ID>_XDLA--refs`` and ``<visit
+ID>_XDLA--repo-export`` (text file and zip archive
+respectively). Together, they are a representation of a (lightweight)
+DataLad dataset, and contain the information necessary to retrieve the
+data content with DataLad (but do not contain the data content
+itself).
 
 Remove the tarball
 ^^^^^^^^^^^^^^^^^^
 
-The DICOM tarball can be safely removed.
+Finally, the DICOM tarball can be safely removed.
+
+.. code-block:: bash
+
+   rm local_dicomstore/<project-ID>/<visit ID>_dicom.tar
+
+The local dicom store can be used as a DataLad entry point for
+obtaining the dicom files.
