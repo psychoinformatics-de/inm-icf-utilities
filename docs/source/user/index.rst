@@ -16,5 +16,5 @@ Please contact `ICF personnel`_ to get access and for any authentication-related
 
    browser
    datalad-generate
-   datalad
+   datalad-access
    datalad-advanced
