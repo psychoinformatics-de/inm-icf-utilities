@@ -16,7 +16,7 @@ individuals.
    :caption: Contents:
 
    user/index
-   reference
+   reference/index
    admin
    developer
 
