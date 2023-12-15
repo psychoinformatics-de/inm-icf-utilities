@@ -6,14 +6,15 @@ Archival workflow
 
 The main part of visit archival is the creation a TAR file.
 
-The DataLad dataset can be generated and placed alongside the tarballs
-without affecting them. Placement in the study folder guarantees the
-same access permissions (authenticated https). The datasets are
-generated based on file metadata -- the TAR archive remains the only
-data source -- so storage overhead is minimal.
+Optionally, the DataLad dataset can be generated and placed alongside
+the tarballs without affecting them. Placement in the study folder
+guarantees the same access permissions (authenticated https). The
+datasets are generated based on file metadata -- the TAR archive
+remains the only data source -- so storage overhead is minimal.
 
 Four scripts, executed in the given order, capture the archival
-process.
+process. See :ref:`scripts` for usage details and :ref:`container` for
+recommended deployment of the tools.
 
 - ``make_studyvisit_archive``
 - ``deposit_visit_metadata`` (optional)
