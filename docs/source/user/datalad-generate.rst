@@ -27,13 +27,11 @@ paths.
 
    mkdir -p local_dicomstore/<project-ID>
 
-Download the visit tarball:
+Download the visit tarball, keeping the same relative path:
 
 .. code-block:: bash
 
-   cd local_dicomstore/<project-ID>
-   datalad download ...
-   cd ../..
+   datalad download "https://data.inm-icf.de/<project-ID>/<visit-ID>_dicom.tar <project-ID>/<visit-ID>_dicom.tar"
 
 For the following examples, the *absolute path* to the local dicom
 store will be represented by ``$STORE_DIR``:
