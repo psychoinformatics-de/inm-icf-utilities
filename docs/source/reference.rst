@@ -1,5 +1,5 @@
-Administrator docs
-==================
+Reference
+=========
 
 The INM-ICF Utilities `Github repository`_ provides a set of
 executable Python scripts which automate generation of deposits in the
@@ -11,11 +11,8 @@ dependencies are packaged as a `Singularity`_ v3 container
 .. _singularity: https://docs.sylabs.io/guides/main/user-guide/
 .. _download: https://ci.appveyor.com/api/projects/mih/inm-icf-utilities/artifacts/icf.sif
 
-Archive generation
-------------------
-
 Containerized execution
-^^^^^^^^^^^^^^^^^^^^^^^
+-----------------------
 
 With the Singilarity image, ``icf.sif``, all scripts are made directly
 available, either through ``singularity run``:
@@ -46,25 +43,11 @@ available under an ``icf-utils`` command.
 
    $ sudo install -t /usr/bin icf-utils
 
-Archival workflow
-^^^^^^^^^^^^^^^^^
-
-The main part of visit archival is the creation a TAR file.
-
-The DataLad dataset can be generated and placed alongside the tarballs
-without affecting them. Placement in the study folder guarantees the
-same access permissions (authenticated https). The datasets are
-generated based on file metadata -- the TAR archive remains the only
-data source -- so storage overhead is minimal.
-
-Four scripts, executed in the given order, capture the archival
-process.
-
 Script listing
-^^^^^^^^^^^^^^
+--------------
 
 ``make_studyvisit_archive``
-"""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This utility generates a TAR archive from a directory containing DICOM files.
 
@@ -87,7 +70,7 @@ for any non-DICOM file is set to the latest timestamp across all DICOM files.
    usage: make_studyvisit_archive [-h] [-o PATH] --id STUDY-ID VISIT-ID <input-dir>
 
 ``deposit_visit_metadata``
-""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This command locates the DICOM tarball for a particular visit in a
 study (given by their respective identifiers) in the data store, and
@@ -116,7 +99,7 @@ files, in JSON format, in the study directory:
   usage: deposit_visit_metadata [-h] [-o PATH] --id STUDY-ID VISIT-ID
 
 ``deposit_visit_dataset``
-"""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This command reads the metadata deposit from
 ``deposit_visit_metadata`` for a visit in a study (given by their
@@ -140,7 +123,7 @@ represents the actual dataset as a compressed archive.
    usage: deposit_visit_dataset [-h] --id STUDY-ID VISIT-ID [-o PATH] [--store-url URL]
 
 ``catalogify_studyvisit_from_meta``
-"""""""""""""""""""""""""""""""""""
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 This command creates or updates a DataLad catalog -- a user-facing
 html rendering of dataset contents. It is placed in the ``catalog``

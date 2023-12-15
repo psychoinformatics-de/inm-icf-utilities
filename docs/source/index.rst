@@ -17,6 +17,7 @@ individuals.
 
    user/index
    reference
+   admin
    developer
 
 
