@@ -47,7 +47,7 @@ def test_studies_dir():
 def data_webserver(test_studies_dir, dataaccess_credential):
     """Yields a URL to a webserver providing data access"""
     if os.environ.get('APPVEYOR', None) == 'true':
-        yield 'http://data.inm-icf.de/~appveyor'
+        yield 'https://data.inm-icf.de/~appveyor'
     else:
         server = HTTPPath(
             test_studies_dir,
