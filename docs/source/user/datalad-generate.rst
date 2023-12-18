@@ -33,6 +33,11 @@ Download the visit tarball, keeping the same relative path:
 
    datalad download "https://data.inm-icf.de/<project-ID>/<visit-ID>_dicom.tar <project-ID>/<visit-ID>_dicom.tar"
 
+Using ``datalad download`` for downloading the file has the benefit of
+using DataLad's credential management. If this is the first time you
+use DataLad to access the project directory, you will be asked to
+provide your ICF credentials. See :ref:`dl-credentials` for details.
+
 For the following examples, the *absolute path* to the local dicom
 store will be represented by ``$STORE_DIR``:
 
