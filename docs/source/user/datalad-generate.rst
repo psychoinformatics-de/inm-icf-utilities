@@ -11,9 +11,26 @@ for DataLad-based access on institute-local infrastructure.
 In principle, such datasets are *lightweight*, meaning that they only
 index the content that can be retrieved from the ICF archive (all
 access restrictions apply). Using DataLad can simplify local access,
-allow raw data versioning, and enable logical transformations of the
-DICOM folder structure - see :ref:`dl-advanced` for examples of the
-latter.
+allow raw data versioning, integrate with existing workflows, and
+enable logical transformations of the DICOM folder structure - see
+:ref:`dl-advanced` for examples of the latter.
+
+Software requirements
+^^^^^^^^^^^^^^^^^^^^^
+
+Accessing the ICF store requires `DataLad`_ with `Datalad-Next`_
+extension installed.  You can find instructions for installing DataLad
+on your operating system in the `DataLad Handbook`_.  `Datalad-Next`_
+can be installed with `pip`_ [1]_.
+
+.. _datalad: https://www.datalad.org/
+.. _datalad-next: https://docs.datalad.org/projects/next
+.. _datalad handbook: https://handbook.datalad.org/intro/installation.html
+.. _pip: https://pip.pypa.io/en/stable/
+
+Dataset generation workflow (all steps after the initial download)
+uses the INM-ICF tools, which are packaged as a Singularity container;
+see :ref:`container`.
 
 Obtain the tarball
 ^^^^^^^^^^^^^^^^^^
@@ -86,6 +103,23 @@ DataLad dataset, and contain the information necessary to retrieve the
 data content with DataLad (but do not contain the data content
 itself).
 
+Create a catalog view (optional)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A catalog page (html+JS rendering of dataset contents generated with
+`DataLad catalog`_) can be created for the visit dataset. This is
+mostly useful when providing (internal) https access to the datasets.
+
+The following command will create the catalog (or update its content)
+and place it in the ``catalog`` folder in the study directory.
+
+.. _DataLad catalog: https://docs.datalad.org/projects/catalog
+
+.. code-block:: bash
+
+   singularity run -B $STORE_DIR icf.sif catalogify_studyvisit_from_meta \
+     --store-dir $STORE_DIR --id <project-ID> <visit ID>
+
 Remove the tarball
 ^^^^^^^^^^^^^^^^^^
 
@@ -95,5 +129,21 @@ Finally, the DICOM tarball can be safely removed.
 
    rm local_dicomstore/<project-ID>/<visit ID>_dicom.tar
 
+Metadata files can be removed, too, leaving only the dataset
+representation in ``*XDLRA*`` files.
+
+.. code-block:: bash
+
+   rm local_dicomstore/<project-ID>/<visit ID>_metadata_*.json
+
+
 The local dicom store can be used as a DataLad entry point for
-obtaining the dicom files.
+obtaining the dicom files, with ICF store serving as the data source
+for dataset clones; see :ref:`dl-access`.
+
+.. rubric:: Footnotes
+
+.. [1] To install software with pip, run a call such as the one below
+       in your favourite `virtual environment <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/>`_::
+
+         python -m pip install datalad-next
