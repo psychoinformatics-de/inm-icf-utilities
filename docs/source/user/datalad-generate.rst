@@ -42,7 +42,7 @@ paths.
 
 .. code-block:: bash
 
-   mkdir -p local_dicomstore/<project-ID>
+   mkdir -p local_dicom_store/<project-ID>
 
 Download the visit tarball, keeping the same relative path:
 
@@ -55,12 +55,12 @@ using DataLad's credential management. If this is the first time you
 use DataLad to access the project directory, you will be asked to
 provide your ICF credentials. See :ref:`dl-credentials` for details.
 
-For the following examples, the *absolute path* to the local dicom
+For the following examples, the *absolute path* to the local DICOM
 store will be represented by ``$STORE_DIR``:
 
 .. code-block:: bash
 
-   export STORE_DIR=$PWD/local_dicomstore
+   export STORE_DIR=$PWD/local_dicom_store
 
 
 Deposit visit metadata alongside tarball
@@ -127,19 +127,19 @@ Finally, the DICOM tarball can be safely removed.
 
 .. code-block:: bash
 
-   rm local_dicomstore/<project-ID>/<visit ID>_dicom.tar
+   rm $STORE_DIR/<project-ID>/<visit ID>_dicom.tar
 
 Metadata files can be removed, too, leaving only the dataset
 representation in ``*XDLRA*`` files.
 
 .. code-block:: bash
 
-   rm local_dicomstore/<project-ID>/<visit ID>_metadata_*.json
+   rm $STORE_DIR/<project-ID>/<visit ID>_metadata_*.json
 
 
-The local dicom store can be used as a DataLad entry point for
-obtaining the dicom files, with ICF store serving as the data source
-for dataset clones; see :ref:`dl-access`.
+The local store can be used as a DataLad entry point for obtaining the
+DICOM files from the ICF store (which would serve as the data source
+for dataset clones); see :ref:`dl-access`.
 
 .. rubric:: Footnotes
 

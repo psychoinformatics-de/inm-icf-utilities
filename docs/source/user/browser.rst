@@ -24,10 +24,10 @@ following:
 Catalog-based browsing
 ======================
 
-By entering the ``datalad_catalog`` directory, users will be able to
+If a catalog has been generated for a given study, users will be able to
 browse through the directory tree with additional annotations
 of available metadata, and search for acquisitions based on keywords
-or name.
+or name, by entering the ``datalad_catalog`` directory.
 
 Downloads
 =========
