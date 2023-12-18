@@ -88,5 +88,5 @@ folder in the study directory.
 
 .. code-block:: console
 
-  $ icf-utils dataladify_studyvisit_from_meta --help
+  $ icf-utils catalogify_studyvisit_from_meta --help
   usage: catalogify_studyvisit_from_meta [-h] [-o PATH] --id STUDY-ID VISIT-ID
