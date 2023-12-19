@@ -11,11 +11,11 @@ the previous section, :ref:`dl-generate`.
 Requirements
 ^^^^^^^^^^^^
 
-Accessing the ICF store requires `DataLad`_ with `Datalad-Next`_
-extension installed.
+Cloning datasets generated with the ICF tooling and accessing the ICF
+store requires `DataLad`_ with `Datalad-Next`_ extension installed.
 You can find instructions for installing DataLad on your operating
-system in the `DataLad Handbook`_.
-`Datalad-Next`_ can be installed with `pip`_ [1]_.
+system in the `DataLad Handbook`_.  `Datalad-Next`_ can be installed
+with `pip`_ [1]_.
 
 .. _datalad: https://www.datalad.org/
 .. _datalad-next: https://docs.datalad.org/projects/next
