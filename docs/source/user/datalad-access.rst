@@ -8,23 +8,11 @@ datasets which have already been created and made available, most
 likely on local infrastructure. Dataset generation is described in
 the previous section, :ref:`dl-generate`.
 
-Requirements
-^^^^^^^^^^^^
-
-Cloning datasets generated with the ICF tooling and accessing the ICF
-store requires `DataLad`_ with `Datalad-Next`_ extension installed.
-You can find instructions for installing DataLad on your operating
-system in the `DataLad Handbook`_.  `Datalad-Next`_ can be installed
-with `pip`_ [1]_.
-
-.. _datalad: https://www.datalad.org/
-.. _datalad-next: https://docs.datalad.org/projects/next
-.. _datalad handbook: https://handbook.datalad.org/intro/installation.html
-.. _pip: https://pip.pypa.io/en/stable/
-
-Obtaining data hosted in the ICF store requires access credentials for
-a given study, issued by the ICF. DataLad acts only as a client
-software. See :ref:`dl-credentials` for details.
+This workflow uses DataLad with DataLad-Next extension (see
+:ref:`dl-requirements`). DataLad datasets index data in their original
+(ICF) location. Obtaining data hosted in the ICF store requires access
+credentials for a given study, issued by the ICF. DataLad acts only as
+a client software. See :ref:`dl-credentials` for details.
 
 Clone & get
 ^^^^^^^^^^^
@@ -34,7 +22,7 @@ location, it can be cloned with DataLad from a URL containing the
 following components:
 
 * a set of configuration parameters, always constant
-* store base URL (e.g., ``file:///data/group/groupname/local_dicom_store``) [2]_
+* store base URL (e.g., ``file:///data/group/groupname/local_dicom_store``) [1]_
 * study ID (e.g., ``my-study``)
 * visit ID (e.g., ``P000123``)
 * a file name suffix / template, ``_annex{{annex_key}}`` (verbatim), always constant
@@ -70,12 +58,7 @@ convenience features DataLad adds on top of this.
 
 .. rubric:: Footnotes
 
-.. [1] To install software with pip, run a call such as the one below
-       in your favourite `virtual environment <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/>`_::
-
-         python -m pip install datalad-next
-
-.. [2] Examples use ``file://`` URLs, given that the datasets are most
+.. [1] Examples use ``file://`` URLs, given that the datasets are most
        likely to be generated on institute-local infrastructure. Other
        protocoles (e.g. ``https://`` or ``ssh://``) can be substituted
        depending on the particular setup, without affecting the URL

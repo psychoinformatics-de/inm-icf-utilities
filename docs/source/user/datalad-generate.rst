@@ -15,22 +15,11 @@ allow raw data versioning, integrate with existing workflows, and
 enable logical transformations of the DICOM folder structure - see
 :ref:`dl-advanced` for examples of the latter.
 
-Software requirements
-^^^^^^^^^^^^^^^^^^^^^
-
-Accessing the ICF store requires `DataLad`_ with `Datalad-Next`_
-extension installed.  You can find instructions for installing DataLad
-on your operating system in the `DataLad Handbook`_.  `Datalad-Next`_
-can be installed with `pip`_ [1]_.
-
-.. _datalad: https://www.datalad.org/
-.. _datalad-next: https://docs.datalad.org/projects/next
-.. _datalad handbook: https://handbook.datalad.org/intro/installation.html
-.. _pip: https://pip.pypa.io/en/stable/
-
-Dataset generation workflow (all steps after the initial download)
-uses the INM-ICF tools, which are packaged as a Singularity container;
-see :ref:`container`.
+The workflow described below uses DataLad with DataLad-Next extension
+for initial DICOM download and the INM-ICF tools packaged as a
+Singularity container for subsequent steps (see
+:ref:`dl-requirements`). ICF access credentials are required (see
+:ref:`dl-credentials`).
 
 Obtain the tarball
 ^^^^^^^^^^^^^^^^^^
@@ -140,10 +129,3 @@ representation in ``*XDLRA*`` files.
 The local store can be used as a DataLad entry point for obtaining the
 DICOM files from the ICF store (which would serve as the data source
 for dataset clones); see :ref:`dl-access`.
-
-.. rubric:: Footnotes
-
-.. [1] To install software with pip, run a call such as the one below
-       in your favourite `virtual environment <https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/>`_::
-
-         python -m pip install datalad-next
