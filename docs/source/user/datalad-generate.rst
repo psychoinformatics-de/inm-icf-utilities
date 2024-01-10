@@ -37,7 +37,7 @@ Download the visit tarball, keeping the same relative path:
 
 .. code-block:: bash
 
-   datalad download "https://data.inm-icf.de/<project-ID>/<visit-ID>_dicom.tar <project-ID>/<visit-ID>_dicom.tar"
+   datalad download "https://data.inm-icf.de/<project-ID>/<visit-ID>_dicom.tar  local_dicom_store/<project-ID>/<visit-ID>_dicom.tar"
 
 Using ``datalad download`` for downloading the file has the benefit of
 using DataLad's credential management. If this is the first time you

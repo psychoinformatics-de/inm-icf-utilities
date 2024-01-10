@@ -37,6 +37,12 @@ Given the exemplary values above, the pattern would expand to
 
     'datalad-annex::?type=external&externaltype=uncurl&encryption=none&url=file:///data/group/groupname/local_dicom_store/my-study/P000123_{{annex_key}}'
 
+A full ``datalad clone`` command could then look like this:
+
+.. code-block::
+    datalad clone 'datalad-annex::?type=external&externaltype=uncurl&encryption=none&url=file:///tmp/local_dicom_store/dl-Z03/P000624_{{annex_key}}'  my_clone
+    
+
 .. note:: The URL is arguably a bit clunky. A convenience short cut can be provided via configuration item ``datalad.clone.url-substitute.<label>`` and a substitution rule based on regular expressions. For example, clone URLs can be shortened to require only an identifier (here, ``file:///data/group/groupname/local_dicom_store``), study ID, and visit ID (``inm-icf/<study-ID>/<visit-ID>``) with the following configuration:
 
    .. code-block::
