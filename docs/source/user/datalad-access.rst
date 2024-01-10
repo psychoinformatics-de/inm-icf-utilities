@@ -42,7 +42,19 @@ A full ``datalad clone`` command could then look like this:
 .. code-block::
 
     datalad clone 'datalad-annex::?type=external&externaltype=uncurl&encryption=none&url=file:///tmp/local_dicom_store/dl-Z03/P000624_{{annex_key}}'  my_clone
-    
+
+.. note::
+
+   The clone command will not fail if the ``datalad-annex::`` URL
+   points to a nonexisting target. If you see the following warning:
+
+   .. code-block:: none
+
+      [WARNING] You appear to have cloned an empty repository.
+      [WARNING] Cloned /path/to/my_clone but could not find a branch with commits
+
+   it is likely that the provided URL is mistyped or otherwise not correct.
+
 
 .. note:: The URL is arguably a bit clunky. A convenience short cut can be provided via configuration item ``datalad.clone.url-substitute.<label>`` and a substitution rule based on regular expressions. For example, clone URLs can be shortened to require only an identifier (here, ``file:///data/group/groupname/local_dicom_store``), study ID, and visit ID (``inm-icf/<study-ID>/<visit-ID>``) with the following configuration:
 
@@ -53,6 +65,7 @@ A full ``datalad clone`` command could then look like this:
    This configuration allows DataLad to take any URL of the form ``file:///data/group/groupname/local_dicom_store/<study-ID>/<visit-ID>`` and assemble the required ``datalad-annex::...`` URL on its own, and a clone call shortens into ``datalad clone file:///data/group/groupname/local_dicom_store/my-study/P000123``.
    You are free to adjust this configuration custom to your needs and preferences.
    Further documentation on it can be found in the `DataLad Docs`_.
+
 
 .. _DataLad Docs: http://docs.datalad.org/en/stable/design/url_substitution.html
 
