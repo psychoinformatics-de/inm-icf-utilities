@@ -41,7 +41,7 @@ A full ``datalad clone`` command could then look like this:
 
 .. code-block::
 
-    datalad clone 'datalad-annex::?type=external&externaltype=uncurl&encryption=none&url=file:///tmp/local_dicom_store/dl-Z03/P000624_{{annex_key}}'  my_clone
+    datalad clone 'datalad-annex::?type=external&externaltype=uncurl&encryption=none&url=file:///tmp/local_dicom_store/my-study/P000123_{{annex_key}}'  my_clone
 
 .. note::
 
