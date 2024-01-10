@@ -31,7 +31,7 @@ The pattern for the URL is::
 
     'datalad-annex::?type=external&externaltype=uncurl&encryption=none&url=<store base URL>/<study ID>/<visit ID>_{{annex_key}}'
 
-Given the exemplary values above, the pattern would expand to
+Given the exemplary values above, the pattern would expand to:
 
 .. code-block::
 
@@ -40,6 +40,7 @@ Given the exemplary values above, the pattern would expand to
 A full ``datalad clone`` command could then look like this:
 
 .. code-block::
+
     datalad clone 'datalad-annex::?type=external&externaltype=uncurl&encryption=none&url=file:///tmp/local_dicom_store/dl-Z03/P000624_{{annex_key}}'  my_clone
     
 

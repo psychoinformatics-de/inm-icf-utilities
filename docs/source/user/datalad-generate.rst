@@ -37,20 +37,26 @@ Download the visit tarball, keeping the same relative path:
 
 .. code-block:: bash
 
-   datalad download "https://data.inm-icf.de/<project-ID>/<visit-ID>_dicom.tar  local_dicom_store/<project-ID>/<visit-ID>_dicom.tar"
+   datalad download "https://data.inm-icf.de/<project-ID>/<visit-ID>_dicom.tar local_dicom_store/<project-ID>/<visit-ID>_dicom.tar"
+
+The local copy of the tarball is required to index its contents. It
+can be removed afterwards -- datasets will use the ICF store as the
+content source.
 
 Using ``datalad download`` for downloading the file has the benefit of
 using DataLad's credential management. If this is the first time you
 use DataLad to access the project directory, you will be asked to
 provide your ICF credentials. See :ref:`dl-credentials` for details.
 
-For the following examples, the *absolute path* to the local DICOM
-store will be represented by ``$STORE_DIR``:
+For the following steps, the ICF utility scripts packaged as a
+Singularity container will be used, and executed with ``singularity
+run`` (see :ref:`container` for download and usage details). The
+*absolute path* to the local DICOM store will be represented by
+``$STORE_DIR``:
 
 .. code-block:: bash
 
    export STORE_DIR=$PWD/local_dicom_store
-
 
 Deposit visit metadata alongside tarball
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -70,20 +76,21 @@ within the tarball (relative path, MD5 checksum, size, and a small
 subset of DICOM headers describing acquisition type), and the latter
 describes the tarball itself.
 
-Deposit dataset alongside tarball
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Deposit dataset representation alongside tarball
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-DataLad dataset is created based on the metadata extracted in the
-previous step.  Additionally, you need to provide the base URL of the
-ICF store, ``<ICF STORE URL>`` (this base URL should not contain study
-or visit ID). The URL, combined with respective IDs, will be
-registered in the dataset as the source of the DICOM tarball, and used
-for retrieval by dataset clones.
+The next step is to create a lightweight, clone-able representation of
+a dataset in the local dataset store. This step relies on the metadata
+extracted with the previous command. Additionally, the base URL of the
+ICF store needs to be provided (here represented by ``<ICF STORE
+URL>``, this base URL should not contain study or visit ID). The URL,
+combined with respective IDs, will be registered in the dataset as the
+source of the DICOM tarball, and used for retrieval by dataset clones.
 
 .. code-block:: bash
 
    singularity run -B $STORE_DIR icf.sif deposit_visit_dataset \
-     --store-dir $STORE_DIR --store-url <ICF STORE URL>
+     --store-dir $STORE_DIR --store-url <ICF STORE URL> --id <project-ID> <visit ID>
 
 This will produce two files, ``<visit ID>_XDLA--refs`` and ``<visit
 ID>_XDLA--repo-export`` (text file and zip archive
@@ -108,6 +115,10 @@ and place it in the ``catalog`` folder in the study directory.
 
    singularity run -B $STORE_DIR icf.sif catalogify_studyvisit_from_meta \
      --store-dir $STORE_DIR --id <project-ID> <visit ID>
+
+This catalog needs to be subsequently served; a simple (possibly
+local) http server is enough. See the generated README file in the
+``catalog`` folder for details.
 
 Remove the tarball
 ^^^^^^^^^^^^^^^^^^
