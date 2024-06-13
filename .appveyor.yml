@@ -53,7 +53,10 @@ artifacts:
 install:
   - curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
   # Bootstrap ICF-like system installation
+  - sudo hostname data.inm-icf.de
   - sudo .appveyor/install_apt_pkgs
+  - .appveyor/apache_enable_ssl
+  - .appveyor/apache_enable_user_dir
   # build the singularity image, unless we got it from the cache
   - sh: "[ ! -f icf.sif ] && singularity build --fakeroot icf.sif singularity/icf.def || true"
   # install image as `icf-utils` (mounting the ICF /data store on-run)
@@ -124,7 +127,6 @@ build_script:
   - git config --global user.email "test@appveyor.land"
   - git config --global user.name "Appveyor Almighty"
 
-
 before_test:
   # simple call to see if datalad and git-annex are installed properly
   - icf-utils datalad wtf
@@ -139,12 +141,6 @@ test_script:
         curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
       fi
   - icf-utils python3 -m pytest -s -v ../tests
-  - sh:
-      if [ X"$ACTIVATE_SSH_LOGIN" == "Xpost-tests" ]; then
-        curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -;
-        touch $HOME/build.lock;
-        while [ -e $HOME/build.lock ]; do sleep 5; done;
-      fi;
 
 
 on_finish:

@@ -2,11 +2,6 @@
 
 set -e -u
 
-pushd /etc/apache2/mods-enabled
+sudo a2enmod userdir
+sudo systemctl restart apache2
 
-sudo ln -s ../mods-available/userdir.load
-sudo ln -s ../mods-available/userdir.conf
-
-popd
-
-sudo apachectl restart
