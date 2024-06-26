@@ -81,7 +81,12 @@ def write_archive(
     with tarfile.open(dest_path, "w") as tar:
         # order of member in archive is significant, sort by path
         for p in tqdm(sorted(content), 'Composing archive', unit=' files'):
-            tinfo = tar.gettarinfo(name=p)
+            p_rel = p.relative_to(input_base_dir)
+            tinfo = tar.gettarinfo(
+                name=p,
+                # use normalized base dir + path relative to input dir
+                arcname=Path(archive_content_base_dir, *p_rel.parts)
+            )
             # adjust properties to make archive builds reproducible
             tinfo = normalize_tarinfo(
                 tinfo,
@@ -95,8 +100,6 @@ def write_archive(
 
 
 def normalize_tarinfo(tinfo, archive_path, timestamp):
-    # strip first level and replace with generated archive root dir name
-    tinfo.name = str(Path(archive_path, *Path(tinfo.name).parts[1:]))
     # be safe
     tinfo.uid = 0
     tinfo.gid = 0
