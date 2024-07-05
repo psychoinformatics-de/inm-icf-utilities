@@ -85,6 +85,7 @@ def write_archive(
             # adjust properties to make archive builds reproducible
             tinfo = normalize_tarinfo(
                 tinfo,
+                input_base_dir,
                 archive_content_base_dir,
                 # go with the reported timestamp from DICOM or with default
                 content[p] or default_timestamp,
@@ -94,9 +95,10 @@ def write_archive(
                 tar.addfile(tinfo, fp)
 
 
-def normalize_tarinfo(tinfo, archive_path, timestamp):
+def normalize_tarinfo(tinfo, input_base_dir, archive_path, timestamp):
     # strip first level and replace with generated archive root dir name
-    tinfo.name = str(Path(archive_path, *Path(tinfo.name).parts[1:]))
+    input_path = (Path('/') / tinfo.name).relative_to(input_base_dir)
+    tinfo.name = str(Path(archive_path) / input_path)
     # be safe
     tinfo.uid = 0
     tinfo.gid = 0
