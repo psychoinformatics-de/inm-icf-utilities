@@ -27,7 +27,7 @@ and save it as ``icf-utils``:
 
    #!/bin/sh
    set -e -u
-   singularity run -B <absolute-path-to-data> <absolute-path-to-icf.sif-file> "$@" > icf-utils
+   singularity run -B <absolute-path-to-data> <absolute-path-to-icf.sif-file> "$@"
 
 The ``-B`` defines a bind path, making it accessible from within the
 container.
