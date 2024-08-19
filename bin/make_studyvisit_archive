@@ -208,7 +208,7 @@ if __name__ == '__main__':
         store_dir = args.output_dir
         msg = (
             "--output-dir argument is deprecated and will be removed "
-            "in the future. Use use -o/--store-dir instead."
+            "in the future. Use -o/--store-dir instead."
         )
         warnings.warn(msg, DeprecationWarning)
     else:
