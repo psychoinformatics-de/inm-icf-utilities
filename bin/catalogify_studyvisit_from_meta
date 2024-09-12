@@ -12,8 +12,9 @@ import sys
 import tempfile
 from uuid import uuid4
 
-from datalad_catalog.catalog import Catalog
+from datalad.api import catalog_add
 from datalad_catalog.webcatalog import WebCatalog
+from datalad_catalog.schema_utils import get_metadata_item
 
 # this points to the top of the ICF data store.
 # internally it will be amended with the missing components
@@ -31,9 +32,6 @@ dicom_metadata_keys = [
     "ProtocolName",
     "PulseSequenceName",
 ]
-
-# Instantiate interface object for api
-catalog_api = Catalog()
 
 
 def main(store_dir: str,
@@ -56,9 +54,12 @@ def main(store_dir: str,
         visit_id,
         dataset_metadata_path,
         file_metadata_path)
-    add_to_catalog(visit_entry, str(study_catalog_path))
+    catalog_add(
+        catalog=study_catalog_path,
+        metadata=visit_entry,
+    )
     # Add visit entry as subdataset to study entry
-    super_dict = read_json_file(ctlg.location / 'metadata' / 'super.json')
+    super_dict = ctlg.get_main_dataset()
     subdatasets = [
         {
             'dataset_id': visit_entry['dataset_id'],
@@ -79,22 +80,24 @@ def get_catalog(study_id, catalog_path):
     """"""
     package_path = Path(__file__).resolve().parent.parent
     # Instantiate WebCatalog object
-    ctlg = WebCatalog(
-        location=str(catalog_path),
-        config_file=str(package_path / 'assets' / 'catalog_config.json'),
-        catalog_action='create',
-    )
+    ctlg = WebCatalog(location=str(catalog_path))
     # If catalog does not exist:
     if not ctlg.is_created():
         # 1. create it
-        ctlg.create()
+        ctlg.create(
+            config_file=str(package_path / 'assets' / 'catalog_config.json'),
+        )
         # 2. generate and add the study-level catalog entry
         study_entry = generate_study_entry(study_id)
-        add_to_catalog(study_entry, str(catalog_path))
+        catalog_add(
+            catalog=catalog_path,
+            metadata=study_entry,
+        )
         # 3. set catalog home page
-        ctlg.main_id = study_entry.get('dataset_id')
-        ctlg.main_version = study_entry.get('dataset_version')
-        ctlg.set_main_dataset()
+        ctlg.set_main_dataset(
+            dataset_id=study_entry.get('dataset_id'),
+            dataset_version=study_entry.get('dataset_version'),
+        )
     return ctlg
 
 
@@ -103,23 +106,32 @@ def generate_study_entry(study_id):
     desc=f"""This data catalog presents the DICOM data collected
     for all visits of the study: {study_id}. Browse through details
     of all study visits in the 'Subdatasets' tab below."""
-    return new_dataset_meta_item(
-        ds_id=str(uuid4()),
-        ds_version='latest',
-        ds_name=study_id,
-        ds_description=desc)
+    meta_item = get_metadata_item(
+        item_type='dataset',
+        dataset_id=str(uuid4()),
+        dataset_version='latest',
+        source_name='automated_addition',
+        source_version='0.1.0',
+    )
+    meta_item['name'] = study_id
+    meta_item['description'] = desc
+    return meta_item
 
 
 def update_entry(ds_id, ds_version, ds_name, key, value, study_catalog_path):
-    meta_item = {
-        'type': 'dataset',
-        'dataset_id': ds_id,
-        'dataset_version': ds_version,
-        'name': ds_name,
-        'metadata_sources': get_metadata_source(),
-    }
+    meta_item = get_metadata_item(
+        item_type='dataset',
+        dataset_id=ds_id,
+        dataset_version=ds_version,
+        source_name='automated_addition',
+        source_version='0.1.0',
+    )
+    meta_item['name'] = ds_name
     meta_item.update({key: value})
-    add_to_catalog(meta_item, str(study_catalog_path))
+    catalog_add(
+        catalog=study_catalog_path,
+        metadata=meta_item,
+    )
     return meta_item
 
 
@@ -129,18 +141,21 @@ def generate_visit_entry(study_id, visit_id, metapath_dataset, metapath_file):
     desc=f"""This page presents the DICOM data collected for the visit
     {visit_id} during the imaging study {study_id}. Browse through details
     of this particular study visit in the 'DICOM' tab below."""
-    meta_item = new_dataset_meta_item(
-        ds_id=str(uuid4()),
-        ds_version='latest',
-        ds_name=visit_id,
-        ds_description=desc)
+    meta_item = get_metadata_item(
+        item_type='dataset',
+        dataset_id=str(uuid4()),
+        dataset_version='latest',
+        source_name='automated_addition',
+        source_version='0.1.0',
+    )
+    meta_item['name'] = visit_id
+    meta_item['description'] = desc
     # Load tarball metadata
     tar_metadata = read_json_file(metapath_dataset)
     expected_keys = ('size', 'md5', 'dspath', 'storepath')
     if not all(k in tar_metadata for k in expected_keys):
         raise ValueError(f'incomplete tarball metadata at {metapath_dataset}')
     # add dataset url
-
     access_url_pre = 'datalad-annex::?type=external&externaltype=uncurl&url='
     access_url_post = '_{{annex_key}}&encryption=none'
     access_url = f'{access_url_pre}{icfstore_baseurl}/{study_id}/{visit_id}{access_url_post}'
@@ -176,14 +191,6 @@ def generate_visit_entry(study_id, visit_id, metapath_dataset, metapath_file):
     return meta_item
 
 
-def add_to_catalog(meta_entry: dict, catalog_dir: str ):
-    """"""
-    with tempfile.NamedTemporaryFile(mode="w+t") as f:
-        json.dump(meta_entry, f)
-        f.seek(0)
-        res = catalog_api("add", catalog_dir=catalog_dir, metadata=f.name)
-
-
 def read_json_file(file_path):
     """
     Load content from catalog metadata file for current node
@@ -195,45 +202,6 @@ def read_json_file(file_path):
         raise("OS error: {0}".format(err))
     except:
         raise("Unexpected error:", sys.exc_info()[0])
-
-
-def get_gitconfig(conf_name):
-    result = (
-        subprocess.run(['git', 'config', conf_name], capture_output=True)
-        .stdout.decode()
-        .rstrip()
-    )
-    return result
-
-
-def get_metadata_source():
-    """Create metadata_sources dict required by catalog schema"""
-    source = {
-        'key_source_map': {},
-        'sources': [
-            {
-                'source_name': 'automated_addition',
-                'source_version': '0.1.0',
-                'source_time': datetime.now().timestamp(),
-                'agent_email': get_gitconfig('user.name'),
-                'agent_name': get_gitconfig('user.email'),
-            }
-        ],
-    }
-    return source
-
-
-def new_dataset_meta_item(ds_id, ds_version, ds_name = '', ds_description = ''):
-    """Create a minimal valid dataset metadata blob in catalog schema"""
-    meta_item = {
-        'type': 'dataset',
-        'dataset_id': ds_id,
-        'dataset_version': ds_version,
-        'name': ds_name,
-        'description': ds_description,
-        'metadata_sources': get_metadata_source(),
-    }
-    return meta_item
 
 
 def format_bytes(bytes, decimals=2):
