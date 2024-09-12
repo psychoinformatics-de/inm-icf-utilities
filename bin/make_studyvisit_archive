@@ -22,6 +22,7 @@ from datetime import datetime
 from hashlib import md5
 from pathlib import Path
 from typing import Dict
+import warnings
 
 from tqdm import tqdm
 
@@ -178,11 +179,16 @@ def main(input_base_dir: str,
 if __name__ == '__main__':
     import argparse
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument(
-        "-o", "--output-dir", metavar='PATH', default=os.getcwd(),
+    g = p.add_mutually_exclusive_group()
+    g.add_argument(
+        "-o", "--store-dir", metavar='PATH', default=os.getcwd(),
         help="Base directory to place the archive structure in. "
         "The corresponding '<study-id>/' subdirectory for the "
-        "study is created automatically, if needed")
+        "study is created automatically, if needed.")
+    g.add_argument(
+        "--output-dir", metavar="PATH",
+        help="Deprecated, will be removed in the future; "
+        "use -o/--store-dir instead.")
     p.add_argument(
         '--id', nargs=2, metavar=('STUDY-ID', 'VISIT-ID'), required=True,
         help="The study and visit identifiers, used to name and "
@@ -198,8 +204,18 @@ if __name__ == '__main__':
         "directory with the name '<study-id>_<visit_id>' is used "
         "to place all archive content in.")
     args = p.parse_args()
+    if args.output_dir is not None:
+        store_dir = args.output_dir
+        msg = (
+            "--output-dir argument is deprecated and will be removed "
+            "in the future. Use -o/--store-dir instead."
+        )
+        warnings.warn(msg, DeprecationWarning)
+    else:
+        store_dir = args.store_dir
+
     main(input_base_dir=args.input_dir,
-         output_base_dir=args.output_dir,
+         output_base_dir=store_dir,
          study_id=args.id[0],
          visit_id=args.id[1],
     )

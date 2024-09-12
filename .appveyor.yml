@@ -80,7 +80,7 @@ install:
       for s in $STUDIES; do
         for v in visit_a visit_b; do
           icf-utils make_studyvisit_archive
-            --output-dir "$STUDIES_DIR"
+            --store-dir "$STUDIES_DIR"
             --id $s $v
             "$FROM_SCANNER";
         done
